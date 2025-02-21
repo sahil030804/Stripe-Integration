@@ -2,38 +2,29 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("users", {
+    await queryInterface.createTable("products", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      name: { type: DataTypes.STRING },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
+      name: {
         type: DataTypes.STRING,
       },
-      phoneNumber: {
+      price: {
+        type: DataTypes.INTEGER,
+      },
+      currency: {
         type: DataTypes.STRING,
       },
-      stripeCustomerId: {
+      stripeProductId: {
         type: DataTypes.STRING,
       },
-      paymentMethods: {
-        type: DataTypes.ARRAY(DataTypes.JSON),
+      stripePriceId: {
+        type: DataTypes.STRING,
       },
-      defaultPaymentMethod: { type: DataTypes.JSON },
       createdAt: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-      updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
@@ -44,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("users");
+    await queryInterface.dropTable("products");
   },
 };
