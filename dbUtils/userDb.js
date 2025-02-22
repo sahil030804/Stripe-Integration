@@ -1,8 +1,7 @@
+const config = require("../config/config");
 const { User } = require("../db/models");
 const bcrypt = require("bcrypt");
-const stripe = require("stripe")(
-  "sk_test_51OuQvfSJvKxGyYS60FppkGxlsGpGtMIOhPr1OWjDmcQCWGJKJPyST7PK5h195ccBR549CTe5NjgtD0Qjsygelbld002hQLrLUv"
-);
+const stripe = require("stripe")(config.stripeConfig.STRIPE_SECRET_KEY);
 
 class UserDb extends User {
   async countExistingEmail(email) {
