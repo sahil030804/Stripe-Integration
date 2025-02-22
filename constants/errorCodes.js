@@ -63,4 +63,14 @@ module.exports = {
       message: "Invalid password",
     },
   },
+
+  //Product
+
+  PRODUCT_NOT_FOUND: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Product not found",
+    },
+  },
 };
