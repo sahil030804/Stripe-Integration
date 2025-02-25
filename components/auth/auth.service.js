@@ -2,6 +2,7 @@ const blackListDb = require("../../dbUtils/blackListDb");
 const refreshTokenDb = require("../../dbUtils/refreshTokenDb");
 const userDb = require("../../dbUtils/userDb");
 const helper = require("../../utils/helper");
+const stripeHelper = require("../../utils/stripeHelper");
 class AuthService {
   async register(registerData) {
     const { name, email, password, phone_number } = registerData;
@@ -11,7 +12,7 @@ class AuthService {
         throw new Error("USER_EXIST");
       }
 
-      const stripeCustomerId = await userDb.createStripeCustomer({
+      const stripeCustomerId = await stripeHelper.createStripeCustomer({
         name,
         email,
         phone_number,

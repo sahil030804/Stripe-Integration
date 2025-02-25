@@ -1,9 +1,17 @@
 const productDb = require("../../dbUtils/productDb");
+const stripeHelper = require("../../utils/stripeHelper");
 
 class ProductService {
   async addProduct(productData) {
     try {
-      const product = await productDb.createProduct(productData);
+      const stripePrice = await stripeHelper.createProductPriceInStripe(
+        productData
+      );
+      const product = await productDb.createProduct(
+        productData,
+        stripePrice.id,
+        stripePrice.product
+      );
       delete product.stripePriceId;
       delete product.stripeProductId;
       return { product };
@@ -13,14 +21,23 @@ class ProductService {
   }
   async updateProduct(productData, productId) {
     try {
-      const isProductExist = await productDb.productExistingCheck(productId);
-      if (!isProductExist) {
+      const product = await productDb.findProductById(productId);
+      if (!product) {
         throw new Error("PRODUCT_NOT_FOUND");
       }
-      const product = await productDb.updateProduct(productData, productId);
-      delete product.stripePriceId;
-      delete product.stripeProductId;
-      return { product };
+      const stripeProductPrice = await stripeHelper.updateProductPriceInStripe(
+        product.stripePriceId,
+        product.stripeProductId,
+        productData
+      );
+      productData.stripePriceId = stripeProductPrice.id;
+      const updatedProduct = await productDb.updateProduct(
+        productData,
+        productId
+      );
+      delete updatedProduct.stripePriceId;
+      delete updatedProduct.stripeProductId;
+      return { updatedProduct };
     } catch (err) {
       throw new Error(err.message);
     }

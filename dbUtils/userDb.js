@@ -1,7 +1,6 @@
 const config = require("../config/config");
 const { User } = require("../db/models");
 const bcrypt = require("bcrypt");
-const stripe = require("stripe")(config.stripeConfig.STRIPE_SECRET_KEY);
 
 class UserDb extends User {
   async countExistingEmail(email) {
@@ -28,23 +27,69 @@ class UserDb extends User {
     return user.toJSON();
   }
 
-  async createStripeCustomer(customerData) {
-    const user = await stripe.customers.create({
-      name: customerData.name,
-      email: customerData.email,
-      phone: customerData.phone_number,
-    });
-    return user.id;
-  }
-
   async findUserByEmail(email) {
     const user = await User.findOne({ where: { email }, raw: true });
     return user;
   }
 
   async findUserById(id) {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { raw: true });
     return user;
+  }
+
+  async updateUserDataByCustomerId(stripeCustomerId, data) {
+    await User.update(data, { where: { stripeCustomerId } });
+  }
+  async findUserBystripeCustomerId(stripeCustomerId) {
+    const user = await User.findOne({ where: { stripeCustomerId }, raw: true });
+    return user;
+  }
+
+  async addPaymentMethodToCustomerDb(
+    paymentMethodId,
+    paymentMethodType,
+    stripeCustomerId
+  ) {
+    const user = await this.findUserBystripeCustomerId(stripeCustomerId);
+    if (!user) {
+      throw new Error("USER_NOT_FOUND");
+    }
+    const paymentMethods = user.paymentMethods || [];
+    paymentMethods.push({
+      id: paymentMethodId,
+      type: paymentMethodType,
+    });
+
+    await User.update(
+      { paymentMethods },
+      {
+        where: { stripeCustomerId },
+      }
+    );
+  }
+
+  async deletePaymentMethodFromCustomerDB(stripeCustomerId, paymentMethodId) {
+    const user = await this.findUserBystripeCustomerId(stripeCustomerId);
+    if (!user) {
+      throw new Error("USER_NOT_FOUND");
+    }
+
+    let existingPaymentMethods = user.paymentMethods || [];
+
+    existingPaymentMethods = existingPaymentMethods.filter(
+      (method) => method.id !== paymentMethodId
+    );
+
+    await this.updateUserDataByCustomerId(stripeCustomerId, {
+      paymentMethods: existingPaymentMethods,
+    });
+  }
+
+  async addCustomerDefaultMethodInDb(stripeCustomerId, id, type) {
+    await User.update(
+      { defaultPaymentMethod: { id, type } },
+      { where: { stripeCustomerId } }
+    );
   }
 }
 
