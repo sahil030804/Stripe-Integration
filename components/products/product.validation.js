@@ -6,12 +6,14 @@ module.exports = {
     body: Joi.object({
       name: Joi.string().required(),
       price: Joi.number().required().min(1),
+      description: Joi.string(),
     }),
   },
   updateProduct: {
     body: Joi.object({
       name: Joi.string().required(),
       price: Joi.number().required().min(1),
+      description: Joi.string(),
     }),
     params: Joi.object({
       id: Joi.number().required(),
