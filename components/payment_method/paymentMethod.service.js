@@ -9,7 +9,6 @@ class PaymentMethodService {
         billingDetails,
         customerId
       );
-
       await userDb.addPaymentMethodToCustomerDb(
         paymentMethod.id,
         paymentMethod.type,

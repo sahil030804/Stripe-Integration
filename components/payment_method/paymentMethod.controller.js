@@ -9,7 +9,6 @@ class PaymentMethodController {
         req.body.billingDetails,
         req.user.stripeCustomerId
       );
-
       res.status(200).json(paymentMethod);
     } catch (err) {
       next(err);
@@ -19,7 +18,7 @@ class PaymentMethodController {
     try {
       const paymentMethods =
         await paymentMethodService.getAllPaymentMethodsOfCustomer(
-          "cus_RoWouEXxeln7R7"
+          req.user.stripeCustomerId
         );
       res.status(200).json(paymentMethods);
     } catch (err) {

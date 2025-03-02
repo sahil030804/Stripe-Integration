@@ -24,6 +24,7 @@ class AuthMiddleware {
         return next(new Error("USER_NOT_FOUND"));
       }
       req.user = user;
+
       next();
     } catch (err) {
       return next(new Error(err.message));

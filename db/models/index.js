@@ -23,13 +23,18 @@ if (config.use_env_variable) {
 
 const User = require("./user")(sequelize, Sequelize.DataTypes);
 const RefreshToken = require("./refreshtoken")(sequelize, Sequelize.DataTypes);
-const Product = require("./product")(sequelize, Sequelize.DataTypes);
+const Plan = require("./plan")(sequelize, Sequelize.DataTypes);
 const Blacklist = require("./blacklist")(sequelize, Sequelize.DataTypes);
+const Payment = require("./payment")(sequelize, Sequelize.DataTypes);
 
 db.User = User;
 db.RefreshToken = RefreshToken;
-db.Product = Product;
+db.Plan = Plan;
 db.Blacklist = Blacklist;
+db.Payment = Payment;
+
+User.hasMany(Payment, { as: "payments", foreignKey: "userId" });
+Payment.belongsTo(User, { as: "users", foreignKey: "id" });
 
 db.sequelize = sequelize;
 
