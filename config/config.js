@@ -21,5 +21,6 @@ module.exports = {
   },
   stripeConfig: {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
   },
 };

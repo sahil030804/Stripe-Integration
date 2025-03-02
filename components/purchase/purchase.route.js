@@ -1,0 +1,19 @@
+const express = require("express");
+const validate = require("../../middleware/validation");
+const authMiddleware = require("../../middleware/authMiddleware");
+const purchaseController = require("./purchase.controller");
+
+const router = express.Router();
+
+router.get(
+  "/active-subscription-plan",
+  authMiddleware.isUserLoggedIn,
+  purchaseController.getActiveSubscriptionOfUser
+);
+router.get(
+  "/:id",
+  authMiddleware.isUserLoggedIn,
+  purchaseController.checkPaymentStatus
+);
+
+module.exports = router;

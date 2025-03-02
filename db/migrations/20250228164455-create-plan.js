@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("products", {
+    await queryInterface.createTable("plans", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,17 +12,19 @@ module.exports = {
       name: {
         type: DataTypes.STRING,
       },
-      price: {
-        type: DataTypes.INTEGER,
-      },
+      description: { type: DataTypes.STRING },
       currency: {
         type: DataTypes.STRING,
       },
       stripeProductId: {
         type: DataTypes.STRING,
       },
-      stripePriceId: {
-        type: DataTypes.STRING,
+      stripePricesId: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+          onetime: [],
+          subscription: [],
+        },
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +34,7 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
       },
       deletedAt: {
         type: DataTypes.DATE,
@@ -39,6 +42,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("products");
+    await queryInterface.dropTable("plans");
   },
 };

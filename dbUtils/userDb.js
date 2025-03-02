@@ -27,21 +27,30 @@ class UserDb extends User {
     return user.toJSON();
   }
 
-  async findUserByEmail(email) {
-    const user = await User.findOne({ where: { email }, raw: true });
+  async findUserByEmail(email, attributes = null) {
+    const user = await User.findOne({
+      where: { email },
+      attributes,
+      raw: true,
+    });
     return user;
   }
 
-  async findUserById(id) {
-    const user = await User.findByPk(id, { raw: true });
+  async findUserById(id, attributes = null) {
+    const user = await User.findByPk(id, { attributes, raw: true });
     return user;
   }
 
   async updateUserDataByCustomerId(stripeCustomerId, data) {
     await User.update(data, { where: { stripeCustomerId } });
   }
-  async findUserBystripeCustomerId(stripeCustomerId) {
-    const user = await User.findOne({ where: { stripeCustomerId }, raw: true });
+  
+  async findUserBystripeCustomerId(stripeCustomerId, attributes = null) {
+    const user = await User.findOne({
+      where: { stripeCustomerId },
+      attributes,
+      raw: true,
+    });
     return user;
   }
 

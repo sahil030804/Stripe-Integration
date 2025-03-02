@@ -64,13 +64,13 @@ module.exports = {
     },
   },
 
-  //Product
+  //plans
 
-  PRODUCT_NOT_FOUND: {
+  PLAN_NOT_FOUND: {
     httpStatusCode: 404,
     body: {
       code: "not_found",
-      message: "Product not found",
+      message: "Plan not found",
     },
   },
 };

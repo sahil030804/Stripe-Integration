@@ -2,18 +2,22 @@ const Joi = require("joi");
 const common = require("../../constants/common");
 
 module.exports = {
-  addProduct: {
+  createPlan: {
     body: Joi.object({
       name: Joi.string().required(),
-      price: Joi.number().required().min(1),
+      currency: Joi.string().required(),
       description: Joi.string(),
+      onetime: Joi.array(),
+      subscription: Joi.array(),
     }),
   },
-  updateProduct: {
+  updatePlan: {
     body: Joi.object({
       name: Joi.string().required(),
-      price: Joi.number().required().min(1),
+      currency: Joi.string().required(),
       description: Joi.string(),
+      onetime: Joi.array(),
+      subscription: Joi.array(),
     }),
     params: Joi.object({
       id: Joi.number().required(),
@@ -25,7 +29,7 @@ module.exports = {
       limit: Joi.number().min(10).default(15).required(),
     }),
   },
-  productId: {
+  planId: {
     params: Joi.object({
       id: Joi.number().required(),
     }),

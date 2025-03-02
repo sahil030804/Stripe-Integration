@@ -1,7 +1,11 @@
 module.exports = {
-  currency: {
+  CURRENCY: {
     USD: "USD",
     INR: "INR",
+  },
+  PRICE_TYPE: {
+    RECURRING: "recurring",
+    ONETIME: "one_time",
   },
   STRIPE_TEST_CARDS: {
     VISA: "tok_visa",
@@ -13,5 +17,23 @@ module.exports = {
     DINERS_CLUB: "tok_diners",
     JCB: "tok_jcb",
     UNIONPAY: "tok_unionpay",
+  },
+  COLLECTION_METHOD: {
+    AUTOMATIC: "charge_automatically",
+    SEND_INVOICE: "send_invoice",
+  },
+  PAYMENT_STATUS: {
+    PAID: "paid",
+    DRAFT: "draft",
+    OPEN: "open",
+    INCOMPLETE: "Incomplete",
+  },
+  PAYMENT_TYPE: {
+    ONETIME: "onetime",
+    SUBSCRIPTION: "subscription",
+  },
+  PLAN_TYPE: {
+    ONETIME: "onetime",
+    SUBSCRIPTION: "subscription",
   },
 };

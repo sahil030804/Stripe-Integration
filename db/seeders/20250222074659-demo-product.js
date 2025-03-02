@@ -6,13 +6,13 @@ const common = require("../../constants/common");
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
-      "products",
+      "plans",
       [
         {
           name: "Elite Plan",
           price: 250,
-          currency: common.currency.USD,
-          stripeProductId: "prod_RorL8TAlzOjMGP",
+          currency: common.CURRENCY.USD,
+          stripePricesId: "prod_RorL8TAlzOjMGP",
           stripePriceId: "price_1QvDcbSJvKxGyYS6T14osHvE",
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -20,8 +20,8 @@ module.exports = {
         {
           name: "Premium Plan",
           price: 500,
-          currency: common.currency.USD,
-          stripeProductId: "prod_RorSts8YSzXHtR",
+          currency: common.CURRENCY.USD,
+          stripePricesId: "prod_RorSts8YSzXHtR",
           stripePriceId: "price_1QvDjpSJvKxGyYS6OiYsPdrJ",
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -32,6 +32,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("products", null, {});
+    await queryInterface.bulkDelete("plans", null, {});
   },
 };

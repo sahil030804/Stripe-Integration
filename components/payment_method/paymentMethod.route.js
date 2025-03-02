@@ -22,7 +22,7 @@ router.delete(
 
 router.get(
   "/list",
-  // authMiddleware.isUserLoggedIn,
+  authMiddleware.isUserLoggedIn,
   paymentMethodController.getAllPaymentMethodsOfCustomer
 );
 

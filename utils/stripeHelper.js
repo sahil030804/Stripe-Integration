@@ -23,41 +23,55 @@ module.exports = {
     return paymentMethod;
   },
 
-  //Product related
-  async createProductPriceInStripe(productData) {
-    const product = await stripe.products.create({
-      name: productData.name,
-      description: productData.description,
+  //plans related
+
+  async findPriceByStripePriceId(priceId) {
+    const price = await stripe.prices.retrieve(priceId);
+    return price;
+  },
+
+  async createProductInStripe(planData) {
+    const plan = await stripe.products.create({
+      name: planData.name,
+      description: planData.description,
     });
+    return plan;
+  },
+
+  async createOnetimePriceInStripe(data, productId) {
     const price = await stripe.prices.create({
-      currency: common.currency.USD,
-      unit_amount: productData.price * 100,
-      product: product.id,
+      currency: common.CURRENCY.USD,
+      unit_amount: data.amount * 100,
+      product: productId,
+      metadata: { validity: `${data.validity} ${data.type}` },
+    });
+    return price;
+  },
+  async createRecurringPriceInStripe(data, productId) {
+    const price = await stripe.prices.create({
+      currency: common.CURRENCY.USD,
+      unit_amount: data.amount * 100,
+      product: productId,
+      recurring: {
+        interval: data.interval,
+      },
     });
     return price;
   },
 
-  async updateProductPriceInStripe(priceId, productId, productData) {
-    const product = await stripe.products.update(productId, {
-      name: productData.name,
-      description: productData.description,
+  async updateProductInStripe(productId, planData) {
+    const plan = await stripe.products.update(productId, {
+      name: planData.name,
+      description: planData.description,
     });
-
-    const price = await stripe.prices.create({
-      unit_amount: productData.price * 100,
-      currency: common.currency.USD,
-      product: product.id,
-    });
-
-    this.deleteStripePrice(priceId);
-    return price;
+    return plan;
   },
   deleteStripePrice(priceId) {
     stripe.prices.update(priceId, {
       active: false,
     });
   },
-  deleteStripeProduct(productId) {
+  deleteStripeplans(productId) {
     stripe.products.del(productId);
   },
 
@@ -82,7 +96,87 @@ module.exports = {
 
   async setDefaultMethodOfCustomer(customer, paymentMethodId) {
     await stripe.customers.update(customer, {
-      invoice_settings: { default_payment_method: paymentMethodId }, //this set default method for invoice auto pay
+      invoice_settings: { default_payment_method: paymentMethodId },
     });
+  },
+
+  //Invoice realted
+
+  async createInvoice(customer, collection_method) {
+    const invoice = await stripe.invoices.create({
+      customer,
+      collection_method,
+      currency: common.CURRENCY.INR,
+    });
+    return invoice;
+  },
+
+  async addplansToInvoice(customer, plans, invoice) {
+    plans.map(async (price) => {
+      await stripe.invoiceItems.create({
+        customer,
+        price,
+        invoice,
+      });
+    });
+  },
+
+  async finalizeInvoice(invoice) {
+    const finalizeInvoice = await stripe.invoices.finalizeInvoice(invoice);
+    return finalizeInvoice;
+  },
+
+  //Subscription related
+
+  async createSubscription(customer, priceId, paymentMethodId) {
+    const subscription = await stripe.subscriptions.create({
+      customer,
+      items: [
+        {
+          price: priceId,
+        },
+      ],
+      add_invoice_items: [{ price: "price_1QxS7QSJvKxGyYS6rHf1TfYr" }],
+      default_payment_method: paymentMethodId,
+      collection_method: common.COLLECTION_METHOD.AUTOMATIC,
+    });
+    return subscription;
+  },
+
+  async updateSubscription(subscriptionId, paymentMethodId) {
+    await stripe.subscriptions.update(subscriptionId, {
+      default_payment_method: paymentMethodId,
+    });
+  },
+  async cancelSubscription(subscriptionId, feedback) {
+    await stripe.subscriptions.cancel(subscriptionId, {
+      cancellation_details: {
+        feedback,
+      },
+    });
+  },
+
+  async getSubscriptionByCustomerId(customerId) {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+    });
+    return subscriptions.data;
+  },
+
+  //Payment Intent Related
+  async getPaymentIntentById(id) {
+    const paymentIntent = await stripe.paymentIntents.retrieve(id);
+    return paymentIntent;
+  },
+
+  //Webhook related
+  createWebhook(body, sig) {
+    const event = stripe.webhooks.constructEvent(
+      body,
+      sig,
+      config.stripeConfig.WEBHOOK_SECRET_KEY
+    );
+    return event;
   },
 };
