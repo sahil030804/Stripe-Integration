@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       paymentMethods: {
-        type: DataTypes.ARRAY(DataTypes.JSON),
+        type: DataTypes.ARRAY(DataTypes.JSONB),
       },
       defaultPaymentMethod: { type: DataTypes.JSON },
       createdAt: {

@@ -7,81 +7,139 @@ class WebhookService {
   async stripeWebhooks(body, sig) {
     try {
       const event = stripeHelper.createWebhook(body, sig);
-      console.log({ event_type: event.type });
+      console.log({ event_type: event?.type });
 
       if (!event) return;
+
+      let intentObj, invoiceObj, userFound;
+
       switch (event.type) {
         case "invoice.created":
-          const invoiceObj = event.data.object;
-          const { payment_method, customer, status } =
-            await stripeHelper.getPaymentIntentById(invoiceObj.payment_intent);
-          const user = await userDb.findUserBystripeCustomerId(customer, [
-            "id",
-          ]);
-          await paymentDb.addPaymentDataInDb({
-            stripeCustomerId: invoiceObj.customer,
-            userId: user.id,
-            amount: invoiceObj.total / 100,
-            paymentStatus: status,
-            paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
-            paymentMethod: {
-              id: payment_method,
-              type: "card",
-            },
-            invoiceId: invoiceObj.id,
-            subscriptionId: invoiceObj.subscription,
-            paymentIntentId: invoiceObj.payment_intent,
-          });
-          break;
-        case "payment_intent.created":
-          const intentObject = event.data.object;
+          invoiceObj = event.data.object;
+          const subscriptionExistCount = await paymentDb.checkSubscriptionExist(
+            invoiceObj.subscription
+          );
 
-          const userFound = await userDb.findUserBystripeCustomerId(
-            intentObject.customer,
+          console.log({ count: subscriptionExistCount });
+
+          if (subscriptionExistCount === 0) {
+            userFound = await userDb.findUserByStripeCustomerId(
+              invoiceObj.customer,
+              ["id"]
+            );
+
+            if (!userFound) {
+              throw new Error("USER_NOT_FOUND");
+            }
+
+            const { payment_method, status } =
+              await stripeHelper.getPaymentIntentById(
+                invoiceObj.payment_intent
+              );
+
+            const existingPayment = await paymentDb.getPaymentStatusFromDb(
+              invoiceObj.payment_intent
+            );
+            if (!existingPayment) {
+              await paymentDb.addPaymentDataInDb({
+                stripeCustomerId: invoiceObj.customer,
+                userId: userFound.id,
+                amount: invoiceObj.total / 100,
+                currency: invoiceObj.currency,
+                paymentStatus: status,
+                paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
+                paymentMethod: {
+                  id: payment_method,
+                  type: "card",
+                },
+                invoiceId: invoiceObj.id,
+                subscriptionId: invoiceObj.subscription,
+                paymentIntentId: invoiceObj.payment_intent,
+              });
+            }
+          }
+          break;
+
+        case "payment_intent.created":
+          intentObj = event.data.object;
+          console.log({ intentcreate: intentObj });
+
+          userFound = await userDb.findUserByStripeCustomerId(
+            intentObj.customer,
             ["id"]
           );
-          await paymentDb.addPaymentDataInDb({
-            stripeCustomerId: intentObject.customer,
-            userId: userFound.id,
-            amount: intentintentObjectObj.amount / 100,
-            paymentStatus: intentObject.status,
-            paymentType: common.PAYMENT_TYPE.ONETIME,
-            paymentMethod: {
-              id: payment_method,
-              type: "card",
-            },
-            invoiceId: null,
-            subscriptionId: null,
-            paymentIntentId: intentObject.id,
+          if (!userFound) {
+            throw new Error("USER_NOT_FOUND");
+          }
+
+          console.log({
+            status:
+              intentObj.invoice !== null && intentObj.description !== null,
           });
-          break;
-        case "invoice.voided":
-        case "invoice.paid":
-        case "invoice.payment_succeeded":
-        case "invoice.payment_failed":
-          const invoiceObject = event.data.object;
-          await paymentDb.updatePaymentDataInDb(
-            {
-              paymentStatus: invoiceObject.status,
-            },
-            invoiceObject.payment_intent,
-            invoiceObject.id
+
+          const existingPaymentIntent = await paymentDb.getPaymentStatusFromDb(
+            intentObj.id
           );
+          if (existingPaymentIntent) {
+            break;
+          }
+
+          if (intentObj.invoice && intentObj.description) {
+            const { subscription } = await stripeHelper.findInvoiceById(
+              intentObj.invoice
+            );
+            await paymentDb.addPaymentDataInDb({
+              stripeCustomerId: intentObj.customer,
+              userId: userFound.id,
+              amount: intentObj.amount / 100,
+              currency: intentObj.currency,
+              paymentStatus: intentObj.status,
+              paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
+              invoiceId: intentObj.invoice,
+              subscriptionId: subscription,
+              paymentIntentId: intentObj.id,
+            });
+          } else {
+            await paymentDb.addPaymentDataInDb({
+              stripeCustomerId: intentObj.customer,
+              userId: userFound.id,
+              amount: intentObj.amount / 100,
+              currency: intentObj.currency,
+              paymentStatus: intentObj.status,
+              paymentType: common.PAYMENT_TYPE.ONETIME,
+              invoiceId: null,
+              subscriptionId: null,
+              paymentIntentId: intentObj.id,
+            });
+          }
           break;
-        case "payment_intent.processing":
+
         case "payment_intent.payment_failed":
         case "payment_intent.cancelled":
         case "payment_intent.succeeded":
-          const intentObj = event.data.object;
-          await paymentDb.updatePaymentDataInDb(
-            {
-              paymentStatus: intentObj.status,
-            },
-            intentObj.id,
-            intentObj.invoice
+          intentObj = event.data.object;
+          console.log({ intentObj });
+
+          const currentStatus = await paymentDb.getPaymentStatusFromDb(
+            intentObj.id
           );
+
+          if (currentStatus !== "succeeded") {
+            await paymentDb.updatePaymentDataInDb(
+              {
+                paymentMethod: {
+                  id: intentObj.payment_method,
+                  type: "card",
+                },
+                paymentStatus: intentObj.status,
+              },
+              intentObj.id
+            );
+          }
           break;
+
         default:
+          console.log("Unhandled event type:", event.type);
           break;
       }
     } catch (err) {

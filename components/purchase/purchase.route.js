@@ -11,6 +11,17 @@ router.get(
   purchaseController.getActiveSubscriptionOfUser
 );
 router.get(
+  "/active-onetime-plan",
+  authMiddleware.isUserLoggedIn,
+  purchaseController.getActiveOnetimePlanOfUser
+);
+router.get(
+  "/history",
+  authMiddleware.isUserLoggedIn,
+  // authMiddleware.checkActivePlanIsValid,
+  purchaseController.getHistoryOfUserPurchase
+);
+router.get(
   "/:id",
   authMiddleware.isUserLoggedIn,
   purchaseController.checkPaymentStatus

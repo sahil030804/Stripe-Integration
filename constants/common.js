@@ -24,9 +24,8 @@ module.exports = {
   },
   PAYMENT_STATUS: {
     PAID: "paid",
-    DRAFT: "draft",
-    OPEN: "open",
-    INCOMPLETE: "Incomplete",
+    INPROGRESS: "in progress",
+    SUCCEEDED: "succeeded",
   },
   PAYMENT_TYPE: {
     ONETIME: "onetime",

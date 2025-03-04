@@ -3,6 +3,7 @@ const config = require("../config/config");
 const userDb = require("../dbUtils/userDb");
 const blackListDb = require("../dbUtils/blackListDb");
 const helper = require("../utils/helper");
+const stripeHelper = require("../utils/stripeHelper");
 
 class AuthMiddleware {
   async isUserLoggedIn(req, res, next) {
@@ -30,6 +31,25 @@ class AuthMiddleware {
       return next(new Error(err.message));
     }
   }
-}
 
+  async checkActivePlanIsValid(req, res, next) {
+    try {
+      const subscriptions = await stripeHelper.getSubscriptionByCustomerId(
+        req.user.stripeCustomerId
+      );
+
+      if (subscriptions.length > 0) {
+        req.hasActiveSubscription = true;
+        req.subscriptionData = subscriptions.data[0]; //get last active subscription
+        next();
+      }
+
+      req.hasActiveSubscription = false;
+      return next(new Error("Purchase plan first then access this page"));
+    } catch (error) {
+      console.error("Error checking subscription status:", error);
+      return next(new Error(err.message));
+    }
+  }
+}
 module.exports = new AuthMiddleware();

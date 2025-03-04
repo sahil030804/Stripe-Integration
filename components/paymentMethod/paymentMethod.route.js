@@ -13,6 +13,12 @@ router.post(
   validate(validateSchema.createPaymentMethod),
   paymentMethodController.createPaymentMethod
 );
+router.put(
+  "/",
+  authMiddleware.isUserLoggedIn,
+  validate(validateSchema.updatePaymentMethod),
+  paymentMethodController.updatePaymentMethod
+);
 router.delete(
   "/",
   authMiddleware.isUserLoggedIn,

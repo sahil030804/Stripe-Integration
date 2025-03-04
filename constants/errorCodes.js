@@ -24,14 +24,14 @@ module.exports = {
   INVALID_ACCESS_TOKEN: {
     httpStatusCode: 401,
     body: {
-      code: "token_invalid",
+      code: "invalid",
       message: "Token is not valid or expired",
     },
   },
   INVALID_REFRESH_TOKEN: {
     httpStatusCode: 401,
     body: {
-      code: "token_invalid",
+      code: "invalid",
       message: "Refresh token is not valid or expired",
     },
   },
@@ -59,7 +59,7 @@ module.exports = {
   INVALID_PASSWORD: {
     httpStatusCode: 400,
     body: {
-      code: "invalid_password",
+      code: "invalid",
       message: "Invalid password",
     },
   },
@@ -71,6 +71,23 @@ module.exports = {
     body: {
       code: "not_found",
       message: "Plan not found",
+    },
+  },
+  PLAN_ALREADY_EXIST: {
+    httpStatusCode: 409,
+    body: {
+      code: "duplicate",
+      message: "Plan already exist",
+    },
+  },
+
+  //payment methods
+
+  PAYMENT_METHOD_NOT_FOUND: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Payment method not found",
     },
   },
 };

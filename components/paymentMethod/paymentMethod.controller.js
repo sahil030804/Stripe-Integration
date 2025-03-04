@@ -14,6 +14,18 @@ class PaymentMethodController {
       next(err);
     }
   }
+  async updatePaymentMethod(req, res, next) {
+    try {
+      const result = await paymentMethodService.updatePaymentMethod(
+        req.body.paymentMethodId,
+        req.body.paymentDetails,
+        req.body.billingDetails
+      );
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
   async getAllPaymentMethodsOfCustomer(req, res, next) {
     try {
       const paymentMethods =

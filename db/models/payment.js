@@ -28,6 +28,9 @@ module.exports = (sequelize, DataTypes) => {
       amount: {
         type: DataTypes.INTEGER,
       },
+      currency: {
+        type: DataTypes.STRING,
+      },
       subscriptionId: {
         type: DataTypes.STRING,
         defaultValue: "",
