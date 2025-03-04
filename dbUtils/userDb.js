@@ -44,8 +44,8 @@ class UserDb extends User {
   async updateUserDataByCustomerId(stripeCustomerId, data) {
     await User.update(data, { where: { stripeCustomerId } });
   }
-  
-  async findUserBystripeCustomerId(stripeCustomerId, attributes = null) {
+
+  async findUserByStripeCustomerId(stripeCustomerId, attributes = null) {
     const user = await User.findOne({
       where: { stripeCustomerId },
       attributes,
@@ -99,6 +99,20 @@ class UserDb extends User {
       { defaultPaymentMethod: { id, type } },
       { where: { stripeCustomerId } }
     );
+  }
+
+  async checkDefaultMethodExist(customerId) {
+    const { defaultPaymentMethod } = await User.findOne({
+      where: {
+        stripeCustomerId: customerId,
+      },
+      attributes: ["defaultPaymentMethod"],
+      raw: true,
+    });
+    if (defaultPaymentMethod != null) {
+      return true;
+    }
+    return false;
   }
 }
 

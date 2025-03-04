@@ -14,6 +14,8 @@ module.exports = {
   },
 
   async createPaymentMethod(type, paymentDetails, billing_details, customerId) {
+    console.log({ paymentDetails });
+
     const paymentMethod = await stripe.paymentMethods.create({
       type,
       card: paymentDetails,
@@ -23,11 +25,22 @@ module.exports = {
     return paymentMethod;
   },
 
+  async updatePaymentMethod(paymentMethodId, paymentDetails, billing_details) {
+    await stripe.paymentMethods.update(paymentMethodId, {
+      card: paymentDetails,
+      billing_details,
+    });
+  },
+
   //plans related
 
   async findPriceByStripePriceId(priceId) {
     const price = await stripe.prices.retrieve(priceId);
     return price;
+  },
+  async findProductByStripeProductId(productId) {
+    const product = await stripe.products.retrieve(productId);
+    return product;
   },
 
   async createProductInStripe(planData) {
@@ -39,11 +52,12 @@ module.exports = {
   },
 
   async createOnetimePriceInStripe(data, productId) {
+    const { name } = await this.findProductByStripeProductId(productId);
     const price = await stripe.prices.create({
       currency: common.CURRENCY.USD,
       unit_amount: data.amount * 100,
       product: productId,
-      metadata: { validity: `${data.validity} ${data.type}` },
+      metadata: { validity: `${data.validity} ${data.type}`, planName: name },
     });
     return price;
   },
@@ -71,13 +85,16 @@ module.exports = {
       active: false,
     });
   },
-  deleteStripeplans(productId) {
+  deleteStripeProduct(productId) {
     stripe.products.del(productId);
   },
 
   //Payment method related
   async getAllPaymentMethodsById(stripeCustomerId) {
-    const methods = await stripe.customers.listPaymentMethods(stripeCustomerId);
+    const methods = await stripe.customers.listPaymentMethods(
+      stripeCustomerId,
+      { limit: 20 }
+    );
     return methods;
   },
 
@@ -126,9 +143,19 @@ module.exports = {
     return finalizeInvoice;
   },
 
+  async findInvoiceById(invoiceId) {
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+    return invoice;
+  },
+
   //Subscription related
 
   async createSubscription(customer, priceId, paymentMethodId) {
+    const { product } = await this.findPriceByStripePriceId(priceId);
+    const productData = await this.findProductByStripeProductId(product);
+
+    console.log({ product });
+
     const subscription = await stripe.subscriptions.create({
       customer,
       items: [
@@ -136,6 +163,11 @@ module.exports = {
           price: priceId,
         },
       ],
+      metadata: {
+        planName: productData.name,
+        description: productData.description,
+        paymentMethodId,
+      },
       add_invoice_items: [{ price: "price_1QxS7QSJvKxGyYS6rHf1TfYr" }],
       default_payment_method: paymentMethodId,
       collection_method: common.COLLECTION_METHOD.AUTOMATIC,
@@ -146,6 +178,9 @@ module.exports = {
   async updateSubscription(subscriptionId, paymentMethodId) {
     await stripe.subscriptions.update(subscriptionId, {
       default_payment_method: paymentMethodId,
+      metadata: {
+        paymentMethodId,
+      },
     });
   },
   async cancelSubscription(subscriptionId, feedback) {
@@ -163,8 +198,61 @@ module.exports = {
     });
     return subscriptions.data;
   },
+  async getSubscriptionBySubscriptionId(subscriptionId) {
+    const subscriptions = await stripe.subscriptions.retrieve(subscriptionId);
+    return subscriptions;
+  },
 
-  //Payment Intent Related
+  //payment intent related
+  async createPaymentIntent(amount, currency, priceId, customer) {
+    const { metadata } = await this.findPriceByStripePriceId(priceId);
+
+    let endDate = new Date();
+
+    const validity = metadata.validity;
+    const [number, unit] = validity.split(" ");
+    const value = parseInt(number, 10);
+
+    switch (unit.toLowerCase()) {
+      case "week":
+        endDate.setDate(endDate.getDate() + value * 7);
+        break;
+      case "month":
+        endDate.setMonth(endDate.getMonth() + value);
+        break;
+      case "year":
+        endDate.setFullYear(endDate.getFullYear() + value);
+        break;
+      default:
+        endDate.setDate(endDate.getDate() + 30);
+        break;
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100,
+      currency,
+      customer,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        ...metadata,
+        planEndDate: endDate.toISOString(),
+        priceId: priceId,
+      },
+    });
+
+    return paymentIntent;
+  },
+
+  async confirmPaymentIntent(id, paymentMethodId) {
+    const result = await stripe.paymentIntents.confirm(id, {
+      payment_method: paymentMethodId,
+      return_url: "https://www.example.com",
+    });
+    return result;
+  },
+
   async getPaymentIntentById(id) {
     const paymentIntent = await stripe.paymentIntents.retrieve(id);
     return paymentIntent;

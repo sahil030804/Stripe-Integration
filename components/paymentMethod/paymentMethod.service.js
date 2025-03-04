@@ -9,6 +9,22 @@ class PaymentMethodService {
         billingDetails,
         customerId
       );
+      const checkDefaultMethodExist = await userDb.checkDefaultMethodExist(
+        customerId
+      );
+
+      if (!checkDefaultMethodExist) {
+        await stripeHelper.setDefaultMethodOfCustomer(
+          customerId,
+          paymentMethod.id
+        );
+
+        await userDb.addCustomerDefaultMethodInDb(
+          customerId,
+          paymentMethod.id,
+          paymentMethod.type
+        );
+      }
       await userDb.addPaymentMethodToCustomerDb(
         paymentMethod.id,
         paymentMethod.type,
@@ -16,6 +32,20 @@ class PaymentMethodService {
       );
       return { status: true };
     } catch (err) {
+      console.log({ "something goes wrong while create payment method": err });
+      throw new Error(err.message);
+    }
+  }
+  async updatePaymentMethod(paymentMethodId, paymentDetails, billingDetails) {
+    try {
+      await stripeHelper.updatePaymentMethod(
+        paymentMethodId,
+        paymentDetails,
+        billingDetails
+      );
+      return { status: true };
+    } catch (err) {
+      console.log({ "something goes wrong while update payment method": err });
       throw new Error(err.message);
     }
   }
@@ -39,9 +69,14 @@ class PaymentMethodService {
         method.isDefault = false;
         return;
       });
-
+      if (paymentMethods.data.length == 0) {
+        throw new Error("PAYMENT_METHOD_NOT_FOUND");
+      }
       return { paymentMethods: paymentMethods.data };
     } catch (err) {
+      console.log({
+        "something goes wrong while getting all payment methods ": err,
+      });
       throw new Error(err.message);
     }
   }
@@ -66,6 +101,9 @@ class PaymentMethodService {
         status: true,
       };
     } catch (err) {
+      console.log({
+        "something goes wrong while setting default payment method": err,
+      });
       throw new Error(err.message);
     }
   }
@@ -80,6 +118,7 @@ class PaymentMethodService {
         status: true,
       };
     } catch (err) {
+      console.log({ "something goes wrong while delete payment method": err });
       throw new Error(err.message);
     }
   }

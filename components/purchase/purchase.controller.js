@@ -19,6 +19,26 @@ class PurchaseController {
       next(err);
     }
   }
+  async getActiveOnetimePlanOfUser(req, res, next) {
+    try {
+      const result = await purchaseService.getActiveOnetimePlanOfUser(
+        req.user.stripeCustomerId
+      );
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+  async getHistoryOfUserPurchase(req, res, next) {
+    try {
+      const result = await purchaseService.getHistoryOfUserPurchase(
+        req.user.stripeCustomerId
+      );
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new PurchaseController();

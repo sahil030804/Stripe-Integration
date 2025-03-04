@@ -1,14 +1,21 @@
+const { Op } = require("sequelize");
 const common = require("../../constants/common");
 const planDb = require("../../dbUtils/planDb");
 const stripeHelper = require("../../utils/stripeHelper");
 
 class PlanService {
   async createPlan(planData) {
-    let onetime;
-    let subscription;
     try {
+      const checkPlanExistWithName = await planDb.countByFilter({
+        where: {
+          name: { [Op.iLike]: planData.name },
+        },
+      });
+      if (checkPlanExistWithName > 0) {
+        throw new Error("PLAN_ALREADY_EXIST");
+      }
       const stripeProduct = await stripeHelper.createProductInStripe(planData);
-      onetime = await Promise.all(
+      const onetime = await Promise.all(
         (planData.onetime || []).map(async (data) => {
           const stripePrice = await stripeHelper.createOnetimePriceInStripe(
             data,
@@ -22,7 +29,7 @@ class PlanService {
         })
       );
 
-      subscription = await Promise.all(
+      const subscription = await Promise.all(
         (planData.subscription || []).map(async (data) => {
           const stripePrice = await stripeHelper.createRecurringPriceInStripe(
             data,
@@ -39,7 +46,7 @@ class PlanService {
       const plan = await planDb.addPlanInDb(planData, onetime, subscription);
       return { plan };
     } catch (err) {
-      throw new Error(err);
+      throw new Error(err.message);
     }
   }
   async updatePlan(planData, planId) {
@@ -48,6 +55,23 @@ class PlanService {
       if (!existingPlan) {
         throw new Error("PLAN_NOT_FOUND");
       }
+      const checkPlanExistWithName = await planDb.countByFilter({
+        where: {
+          [Op.and]: [
+            { name: { [Op.iLike]: planData.name } },
+            { id: { [Op.ne]: planId } },
+          ],
+        },
+      });
+      if (checkPlanExistWithName > 0) {
+        throw new Error("PLAN_ALREADY_EXIST");
+      }
+      existingPlan.stripePricesId.onetime.map((price) => {
+        stripeHelper.deleteStripePrice(price.priceId);
+      });
+      existingPlan.stripePricesId.subscription.map((price) => {
+        stripeHelper.deleteStripePrice(price.priceId);
+      });
       await stripeHelper.updateProductInStripe(
         existingPlan.stripeProductId,
         planData
@@ -89,6 +113,8 @@ class PlanService {
 
       return { updatedplans };
     } catch (err) {
+      console.log({ err });
+
       throw new Error(err.message);
     }
   }
