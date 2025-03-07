@@ -21,7 +21,7 @@ router.put(
 router.delete(
   "/",
   authMiddleware.isUserLoggedIn,
-  validate(subscriptionValidation.deleteSubscription),
+  validate(subscriptionValidation.cancelSubscription),
   subscriptionController.cancelSubscription
 );
 

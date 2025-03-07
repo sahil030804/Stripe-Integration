@@ -13,12 +13,12 @@ router.post(
 );
 router.get(
   "/onetime-plans",
-  authMiddleware.isUserLoggedIn,
+  // authMiddleware.isUserLoggedIn,
   planController.getOnetimePlans
 );
 router.get(
   "/subscription-plans",
-  authMiddleware.isUserLoggedIn,
+  // authMiddleware.isUserLoggedIn,
   planController.getSubscriptionPlans
 );
 router.post(

@@ -11,7 +11,6 @@ module.exports = errorHandler = (err, req, res, next) => {
       message: err.message,
     });
   }
-
   if (errorMatch) {
     const status = errorCodes[error].httpStatusCode;
     const code = errorCodes[error].body.code;
@@ -22,7 +21,7 @@ module.exports = errorHandler = (err, req, res, next) => {
       message: message,
     });
   } else {
-    res.status(500).json({
+    res.status(err.status || 500).json({
       code: err.code || "server_crashed",
       message: err.message || "Server crashed",
     });

@@ -6,7 +6,7 @@ const stripeHelper = require("../../utils/stripeHelper");
 class PlanService {
   async createPlan(planData) {
     try {
-      const checkPlanExistWithName = await planDb.countByFilter({
+      const checkPlanExistWithName = await planDb.countByQuery({
         where: {
           name: { [Op.iLike]: planData.name },
         },
@@ -46,6 +46,7 @@ class PlanService {
       const plan = await planDb.addPlanInDb(planData, onetime, subscription);
       return { plan };
     } catch (err) {
+      console.log({ "Error from create plan": err });
       throw new Error(err.message);
     }
   }
@@ -55,7 +56,7 @@ class PlanService {
       if (!existingPlan) {
         throw new Error("PLAN_NOT_FOUND");
       }
-      const checkPlanExistWithName = await planDb.countByFilter({
+      const checkPlanExistWithName = await planDb.countByQuery({
         where: {
           [Op.and]: [
             { name: { [Op.iLike]: planData.name } },
@@ -113,8 +114,7 @@ class PlanService {
 
       return { updatedplans };
     } catch (err) {
-      console.log({ err });
-
+      console.log({ "Error from update plan": err });
       throw new Error(err.message);
     }
   }
@@ -122,11 +122,13 @@ class PlanService {
   async getAllPlans(page, limit) {
     try {
       const plans = await planDb.getAllPlansFromDb(page, limit);
-      if (!plans) {
+      if (plans.length == 0) {
         throw new Error("PLAN_NOT_FOUND");
       }
+
       return { plans };
     } catch (err) {
+      console.log({ "Error from get all plans": err });
       throw new Error(err.message);
     }
   }
@@ -141,6 +143,9 @@ class PlanService {
       }
       return { oneTimePlans };
     } catch (err) {
+      console.log({
+        "Error from get active onetime plan": err,
+      });
       throw new Error(err.message);
     }
   }
@@ -155,6 +160,9 @@ class PlanService {
       }
       return { plans };
     } catch (err) {
+      console.log({
+        "Error from get active subscription plan": err,
+      });
       throw new Error(err.message);
     }
   }
@@ -166,6 +174,7 @@ class PlanService {
       }
       return { plan };
     } catch (err) {
+      console.log({ "Error from get single plan": err });
       throw new Error(err.message);
     }
   }
@@ -178,6 +187,9 @@ class PlanService {
       await planDb.deletePlanInDb(planId);
       return { message: "plans deleted successfully" };
     } catch (err) {
+      console.log({
+        "Error from delete plan": err,
+      });
       throw new Error(err.message);
     }
   }

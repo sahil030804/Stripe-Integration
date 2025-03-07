@@ -80,6 +80,13 @@ module.exports = {
       message: "Plan already exist",
     },
   },
+  PRICE_DELETED: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Plan's price deleted",
+    },
+  },
 
   //payment methods
 
@@ -88,6 +95,31 @@ module.exports = {
     body: {
       code: "not_found",
       message: "Payment method not found",
+    },
+  },
+  PAYMENT_METHOD_NOT_ATTACHED: {
+    httpStatusCode: 400,
+    body: {
+      code: "not_attached",
+      message: "The specified payment method is not attached to this customer.",
+    },
+  },
+
+  CANNOT_DELETE_METHOD: {
+    httpStatusCode: 409,
+    body: {
+      code: "payment_method_in_use",
+      message:
+        "Can't delete payment method cause it attached to active subscription",
+    },
+  },
+  // price related
+  INVALID_PRICE: {
+    httpStatusCode: 400,
+    body: {
+      code: "invalid",
+      message:
+        "Ensure that subscription create for recurring price and payment intent for onetime price only not vice versa.",
     },
   },
 };

@@ -5,7 +5,7 @@ class PaymentIntentController {
   async createPaymentIntent(req, res, next) {
     try {
       const result = await paymentIntentService.createPaymentIntent(
-        req.body,
+        req.body.priceId,
         req.user.stripeCustomerId
       );
       res.status(201).json(result);
@@ -14,12 +14,11 @@ class PaymentIntentController {
     }
   }
   async confirmPaymentIntent(req, res, next) {
-    console.log({ body: req.body });
-
     try {
       const result = await paymentIntentService.confirmPaymentIntent(
         req.body.paymentIntentId,
-        req.body.paymentMethodId
+        req.body.paymentMethodId,
+        req.user.stripeCustomerId
       );
       res.status(201).json(result);
     } catch (err) {

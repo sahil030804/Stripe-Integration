@@ -13,7 +13,7 @@ module.exports = {
       paymentMethodId: Joi.string().required(),
     }),
   },
-  deleteSubscription: {
+  cancelSubscription: {
     body: Joi.object({
       subscriptionId: Joi.string().required(),
       feedback: Joi.string().required(),
