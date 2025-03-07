@@ -1,3 +1,4 @@
+const common = require("../../constants/common");
 const paymentDb = require("../../dbUtils/paymentDb");
 const stripeHelper = require("../../utils/stripeHelper");
 
@@ -25,7 +26,10 @@ class PurchaseService {
   }
   async getActiveOnetimePlanOfUser(customerId) {
     try {
-      const plans = await paymentDb.getActivePlanOfUser(customerId, "onetime");
+      const plans = await paymentDb.getActivePlanOfUser(
+        customerId,
+        common.PLAN_TYPE.ONETIME
+      );
       const onetimePlans = await Promise.all(
         plans.map(async (plan) => {
           const { metadata } = await stripeHelper.getPaymentIntentById(
@@ -37,7 +41,7 @@ class PurchaseService {
               planName: metadata.planName,
               amount: plan.amount,
               currency: plan.currency,
-              expiryDate: new Date(metadata.planEndDate).toDateString(),
+              expiryDate: new Date(metadata.planEndDate).toISOString(),
             };
           }
         })
@@ -67,20 +71,41 @@ class PurchaseService {
               await stripeHelper.getSubscriptionBySubscriptionId(
                 record.subscriptionId
               );
-            const invoice = await stripeHelper.findInvoiceById(
-              record.invoiceId
+            const invoice = await stripeHelper.getInvoiceById(record.invoiceId);
+
+            const startDate = new Date(
+              invoice.status_transitions.paid_at * 1000
             );
 
+            let endDate = new Date(startDate);
+
+            const unit = subscription.plan.interval;
+            const value = subscription.plan.interval_count;
+
+            switch (unit.toLowerCase()) {
+              case "week":
+                endDate.setDate(endDate.getDate() + value * 7);
+                break;
+              case "month":
+                endDate.setMonth(endDate.getMonth() + value);
+                break;
+              case "year":
+                endDate.setFullYear(endDate.getFullYear() + value);
+                break;
+              default:
+                endDate.setDate(endDate.getDate() + 30);
+                break;
+            }
+
             record.planName = subscription.metadata.planName;
-            record.amount = subscription.plan.amount / 100;
+            record.amount = invoice.amount_due / 100;
             record.currency = subscription.currency.toUpperCase();
             record.status = subscription.status;
-            record.startDate = new Date(
-              subscription.billing_cycle_anchor * 1000
-            ).toDateString();
-            record.nextDueDate = new Date(
-              subscription.current_period_end * 1000
-            ).toDateString();
+            record.startDate = startDate.toISOString();
+            record.nextDueDate = endDate.toISOString();
+            record.planEndDate = subscription.cancel_at
+              ? new Date(subscription.cancel_at * 1000).toISOString()
+              : new Date(subscription.canceled_at * 1000).toISOString();
             record.invoiceUrl = invoice.hosted_invoice_url;
           } else {
             const paymentIntent = await stripeHelper.getPaymentIntentById(
@@ -92,11 +117,11 @@ class PurchaseService {
             record.currency = paymentIntent.currency.toUpperCase();
             record.startDate = new Date(
               paymentIntent.created * 1000
-            ).toDateString();
+            ).toISOString();
             record.nextDueDate = null;
             record.planEndDate = new Date(
               paymentIntent.metadata.planEndDate
-            ).toDateString();
+            ).toISOString();
           }
         })
       );

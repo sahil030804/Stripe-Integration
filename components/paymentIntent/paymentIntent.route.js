@@ -14,10 +14,7 @@ router.post(
 router.post(
   "/confirm",
   authMiddleware.isUserLoggedIn,
-  //   validate(subscriptionValidation.createSubscription),
   paymentIntentController.confirmPaymentIntent
 );
-
-
 
 module.exports = router;

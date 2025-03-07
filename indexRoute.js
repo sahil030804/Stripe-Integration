@@ -10,7 +10,7 @@ const router = express.Router();
 router.use("/auth", authRoute);
 router.use("/plans", planRoute);
 router.use("/payment-methods", paymentMethodRoute);
-router.use("/payment-intent", paymentIntentRoute);
+router.use("/onetime", paymentIntentRoute);
 router.use("/purchase", purchaseRoute);
 router.use("/subscriptions", subscriptionRoute);
 

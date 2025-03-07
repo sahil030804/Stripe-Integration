@@ -7,17 +7,40 @@ module.exports = {
       name: Joi.string().required(),
       currency: Joi.string().required(),
       description: Joi.string(),
-      onetime: Joi.array(),
-      subscription: Joi.array(),
+      onetime: Joi.array().items(
+        Joi.object({
+          amount: Joi.number().min(1).required(),
+          validity: Joi.string().required(),
+          type: Joi.string().required(),
+        })
+      ),
+      subscription: Joi.array().items(
+        Joi.object({
+          amount: Joi.number().min(1).required(),
+          interval: Joi.string().required(),
+        })
+      ),
     }),
   },
+
   updatePlan: {
     body: Joi.object({
       name: Joi.string().required(),
       currency: Joi.string().required(),
       description: Joi.string(),
-      onetime: Joi.array(),
-      subscription: Joi.array(),
+      onetime: Joi.array().items(
+        Joi.object({
+          amount: Joi.number().min(1).required(),
+          validity: Joi.string().required(),
+          type: Joi.string().required(),
+        })
+      ),
+      subscription: Joi.array().items(
+        Joi.object({
+          amount: Joi.number().min(1).required(),
+          interval: Joi.string().required(),
+        })
+      ),
     }),
     params: Joi.object({
       id: Joi.number().required(),

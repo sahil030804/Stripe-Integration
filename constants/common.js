@@ -23,8 +23,8 @@ module.exports = {
     SEND_INVOICE: "send_invoice",
   },
   PAYMENT_STATUS: {
+    PENDING: "pending",
     PAID: "paid",
-    INPROGRESS: "in progress",
     SUCCEEDED: "succeeded",
   },
   PAYMENT_TYPE: {

@@ -46,8 +46,8 @@ class AuthMiddleware {
 
       req.hasActiveSubscription = false;
       return next(new Error("Purchase plan first then access this page"));
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
+    } catch (err) {
+      console.error("Error from checking subscription status:", err);
       return next(new Error(err.message));
     }
   }

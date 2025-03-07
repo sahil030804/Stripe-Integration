@@ -7,10 +7,17 @@ class PaymentDb extends Payment {
     await Payment.create(paymentData);
   }
 
-  async updatePaymentDataInDb(paymentData, paymentIntentId, invoiceId) {
+  async updatePaymentDataInDb(paymentData, id) {
     await Payment.update(paymentData, {
       where: {
-        paymentIntentId: paymentIntentId,
+        [Op.or]: [
+          {
+            paymentIntentId: id,
+          },
+          {
+            invoiceId: id,
+          },
+        ],
       },
       returning: true,
     });
@@ -24,9 +31,8 @@ class PaymentDb extends Payment {
     });
     return status;
   }
-  async checkSubscriptionExist(subscriptionId) {
-    console.log({ subscriptionId });
 
+  async checkSubscriptionExist(subscriptionId) {
     const result = await Payment.findAndCountAll({
       where: { subscriptionId },
     });
@@ -68,6 +74,21 @@ class PaymentDb extends Payment {
     });
 
     return activePlans;
+  }
+
+  async checkExistingPaymentIntent(paymentIntentId) {
+    const paymentIntent = await Payment.findOne({
+      where: { paymentIntentId },
+    });
+
+    return paymentIntent;
+  }
+  async checkExistingInvoice(invoiceId) {
+    const invoice = await Payment.findOne({
+      where: { invoiceId },
+    });
+
+    return invoice;
   }
 }
 

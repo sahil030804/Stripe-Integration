@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const config = require("./config/config");
 const webhookHandler = require("./components/webhook/webhook.controller");
 
@@ -7,6 +8,13 @@ const router = require("./indexRoute");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
 app.post(
   "/api/webhooks",
   express.raw({ type: "application/json" }),

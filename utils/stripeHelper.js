@@ -14,8 +14,6 @@ module.exports = {
   },
 
   async createPaymentMethod(type, paymentDetails, billing_details, customerId) {
-    console.log({ paymentDetails });
-
     const paymentMethod = await stripe.paymentMethods.create({
       type,
       card: paymentDetails,
@@ -32,6 +30,10 @@ module.exports = {
     });
   },
 
+  async findCustomerByCustomerId(customerId) {
+    const customer = await stripe.customers.retrieve(customerId);
+    return customer;
+  },
   //plans related
 
   async findPriceByStripePriceId(priceId) {
@@ -90,7 +92,8 @@ module.exports = {
   },
 
   //Payment method related
-  async getAllPaymentMethodsById(stripeCustomerId) {
+
+  async getAllPaymentMethodsByCutomerId(stripeCustomerId) {
     const methods = await stripe.customers.listPaymentMethods(
       stripeCustomerId,
       { limit: 20 }
@@ -143,7 +146,7 @@ module.exports = {
     return finalizeInvoice;
   },
 
-  async findInvoiceById(invoiceId) {
+  async getInvoiceById(invoiceId) {
     const invoice = await stripe.invoices.retrieve(invoiceId);
     return invoice;
   },
@@ -153,9 +156,8 @@ module.exports = {
   async createSubscription(customer, priceId, paymentMethodId) {
     const { product } = await this.findPriceByStripePriceId(priceId);
     const productData = await this.findProductByStripeProductId(product);
-
-    console.log({ product });
-
+    const endDate = new Date();
+    endDate.setFullYear(endDate.getFullYear() + 1); //temporary set 1 year bydefault
     const subscription = await stripe.subscriptions.create({
       customer,
       items: [
@@ -163,12 +165,13 @@ module.exports = {
           price: priceId,
         },
       ],
+      cancel_at: endDate,
       metadata: {
         planName: productData.name,
         description: productData.description,
         paymentMethodId,
       },
-      add_invoice_items: [{ price: "price_1QxS7QSJvKxGyYS6rHf1TfYr" }],
+      expand: ["latest_invoice"],
       default_payment_method: paymentMethodId,
       collection_method: common.COLLECTION_METHOD.AUTOMATIC,
     });
@@ -232,6 +235,7 @@ module.exports = {
       amount: amount * 100,
       currency,
       customer,
+      description: metadata.planName,
       automatic_payment_methods: {
         enabled: true,
       },
@@ -266,5 +270,14 @@ module.exports = {
       config.stripeConfig.WEBHOOK_SECRET_KEY
     );
     return event;
+  },
+
+  //for erros
+  async throwStripeErrors(err) {
+    throw {
+      status: err.raw.statusCode,
+      code: err.raw.code ? err.raw.code : err.raw.type,
+      message: err.raw.message,
+    };
   },
 };

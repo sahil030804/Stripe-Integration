@@ -59,7 +59,7 @@ class UserDb extends User {
     paymentMethodType,
     stripeCustomerId
   ) {
-    const user = await this.findUserBystripeCustomerId(stripeCustomerId);
+    const user = await this.findUserByStripeCustomerId(stripeCustomerId);
     if (!user) {
       throw new Error("USER_NOT_FOUND");
     }
@@ -78,7 +78,7 @@ class UserDb extends User {
   }
 
   async deletePaymentMethodFromCustomerDB(stripeCustomerId, paymentMethodId) {
-    const user = await this.findUserBystripeCustomerId(stripeCustomerId);
+    const user = await this.findUserByStripeCustomerId(stripeCustomerId);
     if (!user) {
       throw new Error("USER_NOT_FOUND");
     }

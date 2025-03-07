@@ -12,7 +12,7 @@ class PlanDb extends Plan {
     return true;
   }
 
-  async countByFilter(query) {
+  async countByQuery(query) {
     const existingPlan = await Plan.findAndCountAll(query);
     return existingPlan.count;
   }
