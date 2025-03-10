@@ -1,5 +1,7 @@
 const stripeHelper = require("../../utils/stripeHelper");
 const webhookHelper = require("../../utils/webhookHelper");
+const queueHelper = require("../../utils/queueHelper");
+
 const _ = require("lodash");
 
 class WebhookService {
@@ -17,7 +19,8 @@ class WebhookService {
         case "payment_intent.cancelled":
         case "payment_intent.succeeded":
           intentObj = event.data.object;
-          await webhookHelper.addPaymentDataInDb(intentObj);
+          await queueHelper.queues.paymentProcessJob(intentObj);
+          break;
         case "customer.subscription.updated":
           subscriptionObj = event.data.object;
 
@@ -31,7 +34,6 @@ class WebhookService {
               subscriptionObj.id,
               invoice_settings.default_payment_method
             );
-            
           }
 
           break;

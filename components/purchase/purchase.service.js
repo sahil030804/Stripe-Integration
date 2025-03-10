@@ -73,9 +73,7 @@ class PurchaseService {
               );
             const invoice = await stripeHelper.getInvoiceById(record.invoiceId);
 
-            const startDate = new Date(
-              invoice.status_transitions.paid_at * 1000
-            );
+            const startDate = new Date(invoice.created * 1000);
 
             let endDate = new Date(startDate);
 

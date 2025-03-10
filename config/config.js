@@ -13,6 +13,13 @@ module.exports = {
   },
   serverConfig: {
     port: process.env.PORT,
+    SESSION_SECRET_KEY: process.env.SESSION_SECRET_KEY,
+  },
+  redis: {
+    REDIS_USERNAME: process.env.REDIS_USERNAME,
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT,
   },
   jwtConfig: {
     ACCESS_TOKEN_KEY: process.env.ACCESS_TOKEN_KEY,
