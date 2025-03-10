@@ -17,7 +17,6 @@ module.exports = {
           },
           intentObj.invoice
         );
-        //   break;
         return;
       }
       const invoice = await stripeHelper.getInvoiceById(intentObj.invoice);
@@ -47,7 +46,6 @@ module.exports = {
     );
 
     if (currentStatus === "succeeded") {
-      // break;
       return;
     }
 
