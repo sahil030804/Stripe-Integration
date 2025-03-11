@@ -118,16 +118,16 @@ class PaymentMethodService {
   }
   async deletePaymentMethodOfCustomer(stripeCustomerId, paymentMethodId) {
     try {
-      // const subscriptionsList = await stripeHelper.getSubscriptionByCustomerId(
-      //   stripeCustomerId
-      // );
-      // const usedPaymentMethod = _.map(
-      //   subscriptionsList,
-      //   "default_payment_method" // get only payment methods id from array by lodash map method
-      // );
-      // if (usedPaymentMethod.includes(paymentMethodId)) {
-      //   throw new Error("CANNOT_DELETE_METHOD");
-      // }
+      const subscriptionsList = await stripeHelper.getSubscriptionByCustomerId(
+        stripeCustomerId
+      );
+      const usedPaymentMethod = _.map(
+        subscriptionsList,
+        "default_payment_method" // get only payment methods id from array by lodash map method
+      );
+      if (usedPaymentMethod.includes(paymentMethodId)) {
+        throw new Error("CANNOT_DELETE_METHOD");
+      }
       let customerPaymentMethods =
         await stripeHelper.getAllPaymentMethodsByCutomerId(stripeCustomerId);
       customerPaymentMethods = _.map(customerPaymentMethods.data, "id"); // get only payment methods id from array by lodash map method

@@ -6,11 +6,17 @@ const validate = require("../../middleware/validation");
 
 const router = express.Router();
 
-router.post(
-  "/",
+router.put(
+  "/pause",
   authMiddleware.isUserLoggedIn,
-  validate(subscriptionValidation.createSubscription),
-  subscriptionController.createSubscription
+  // validate(subscriptionValidation.updateSubscription),
+  subscriptionController.pauseSubscription
+);
+router.put(
+  "/resume",
+  authMiddleware.isUserLoggedIn,
+  // validate(subscriptionValidation.updateSubscription),
+  subscriptionController.resumeSubscription
 );
 router.put(
   "/",
@@ -24,5 +30,10 @@ router.delete(
   validate(subscriptionValidation.cancelSubscription),
   subscriptionController.cancelSubscription
 );
-
+router.post(
+  "/",
+  authMiddleware.isUserLoggedIn,
+  validate(subscriptionValidation.createSubscription),
+  subscriptionController.createSubscription
+);
 module.exports = router;

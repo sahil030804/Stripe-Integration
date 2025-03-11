@@ -186,6 +186,20 @@ module.exports = {
       },
     });
   },
+  async pauseSubscription(subscriptionId) {
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      pause_collection: {
+        behavior: "mark_uncollectible",
+      },
+    });
+    return subscription;
+  },
+  async resumeSubscription(subscriptionId) {
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      pause_collection: null,
+    });
+    return subscription;
+  },
   async cancelSubscription(subscriptionId, feedback) {
     await stripe.subscriptions.cancel(subscriptionId, {
       cancellation_details: {

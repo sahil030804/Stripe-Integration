@@ -64,6 +64,52 @@ class SubscriptionService {
       throw new Error(err.message);
     }
   }
+  async pauseSubscription(subscriptionId) {
+    try {
+      const checkSubscriptionExist =
+        await stripeHelper.getSubscriptionBySubscriptionId(subscriptionId);
+
+      if (checkSubscriptionExist.status != "active") {
+        throw new Error("Subscription not available");
+      }
+      const subscription = await stripeHelper.pauseSubscription(subscriptionId);
+      return {
+        message: "Subscription Paused.",
+        subscription: {
+          id: subscription.id,
+          status: subscription.status,
+          pause_collection: subscription.pause_collection,
+        },
+      };
+    } catch (err) {
+      console.log({ "Error from pause subscription": err });
+      throw new Error(err.message);
+    }
+  }
+  async resumeSubscription(subscriptionId) {
+    try {
+      const checkSubscriptionExist =
+        await stripeHelper.getSubscriptionBySubscriptionId(subscriptionId);
+
+      if (checkSubscriptionExist.status != "active") {
+        throw new Error("Subscription not available");
+      }
+      const subscription = await stripeHelper.resumeSubscription(
+        subscriptionId
+      );
+      return {
+        message: "Subscription Resumed.",
+        subscription: {
+          id: subscription.id,
+          status: subscription.status,
+          pause_collection: subscription.pause_collection,
+        },
+      };
+    } catch (err) {
+      console.log({ "Error from resume subscription": err });
+      throw new Error(err.message);
+    }
+  }
   async cancelSubscription(subscriptionId, feedback) {
     try {
       const subscription = await stripeHelper.cancelSubscription(

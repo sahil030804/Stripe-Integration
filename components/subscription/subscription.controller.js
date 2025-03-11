@@ -24,6 +24,26 @@ class SubscriptionController {
       next(err);
     }
   }
+  async pauseSubscription(req, res, next) {
+    try {
+      const subscription = await subcriptionService.pauseSubscription(
+        req.body.subscriptionId
+      );
+      res.status(200).json(subscription);
+    } catch (err) {
+      next(err);
+    }
+  }
+  async resumeSubscription(req, res, next) {
+    try {
+      const subscription = await subcriptionService.resumeSubscription(
+        req.body.subscriptionId
+      );
+      res.status(200).json(subscription);
+    } catch (err) {
+      next(err);
+    }
+  }
   async cancelSubscription(req, res, next) {
     try {
       const subscription = await subcriptionService.cancelSubscription(
