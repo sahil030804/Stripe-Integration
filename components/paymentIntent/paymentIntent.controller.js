@@ -6,6 +6,7 @@ class PaymentIntentController {
     try {
       const result = await paymentIntentService.createPaymentIntent(
         req.body.priceId,
+        req.body.promocodeId,
         req.user.stripeCustomerId
       );
       res.status(201).json(result);

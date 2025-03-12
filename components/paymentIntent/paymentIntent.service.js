@@ -1,11 +1,14 @@
+const { Op } = require("sequelize");
 const common = require("../../constants/common");
 const paymentDb = require("../../dbUtils/paymentDb");
+const promocodeDb = require("../../dbUtils/promocodeDb");
 const userDb = require("../../dbUtils/userDb");
 const stripeHelper = require("../../utils/stripeHelper");
 const _ = require("lodash");
+const helper = require("../../utils/helper");
 
 class PaymentIntentService {
-  async createPaymentIntent(priceId, customerId) {
+  async createPaymentIntent(priceId, promocodeId, customerId) {
     try {
       const priceFound = await stripeHelper.findPriceByStripePriceId(priceId);
       if (!priceFound.active) {
@@ -14,15 +17,38 @@ class PaymentIntentService {
       if (priceFound.type == "recurring") {
         throw new Error("INVALID_PRICE");
       }
+
+      let totalAmount = priceFound.unit_amount / 100;
+
+      if (promocodeId) {
+        const checkPromocodeIsValid = await helper.checkPromocodeIsValid(
+          promocodeId,
+          priceFound.unit_amount,
+          priceFound.currency
+        );
+
+        if (checkPromocodeIsValid.amount_off) {
+          totalAmount -= checkPromocodeIsValid.amount_off;
+        }
+
+        if (checkPromocodeIsValid.percent_off) {
+          totalAmount -=
+            (totalAmount * checkPromocodeIsValid.percent_off) / 100;
+        }
+        totalAmount = Math.max(0, totalAmount);
+      }
       const paymentIntent = await stripeHelper.createPaymentIntent(
-        priceFound.unit_amount / 100,
+        totalAmount,
         priceFound.currency,
         priceId,
         customerId
       );
+      if (!paymentIntent) throw new Error("PAYMENT_INTENT_NOT_CREATED");
       const userFound = await userDb.findUserByStripeCustomerId(
         paymentIntent.customer
       );
+      if (!userFound) throw new Error("USER_NOT_FOUND");
+
       await paymentDb.addPaymentDataInDb({
         stripeCustomerId: paymentIntent.customer,
         userId: userFound.id,
@@ -38,13 +64,13 @@ class PaymentIntentService {
       return {
         id: paymentIntent.id,
         clientSecret: paymentIntent.client_secret,
-        // paymentIntent,
       };
     } catch (err) {
       console.log(`Error from create payment intent`, err);
       throw new Error(err.message);
     }
   }
+
   async confirmPaymentIntent(
     paymentIntentId,
     paymentMethodId,
@@ -61,6 +87,7 @@ class PaymentIntentService {
         paymentIntentId,
         paymentMethodId
       );
+      if (!result) throw new Error("PAYMENT_INTENT_NOT_CONFIRMED");
       await paymentDb.updatePaymentDataInDb(
         {
           paymentMethod: {

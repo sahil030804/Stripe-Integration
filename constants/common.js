@@ -22,6 +22,10 @@ module.exports = {
     AUTOMATIC: "charge_automatically",
     SEND_INVOICE: "send_invoice",
   },
+  COLLECTION_BEHAVIOUR: {
+    UNCOLLECTIBLE: "mark_uncollectible",
+    DRAFT: "keep_as_draft",
+  },
   PAYMENT_STATUS: {
     PENDING: "pending",
     PAID: "paid",

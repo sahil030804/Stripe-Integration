@@ -1,5 +1,6 @@
 const common = require("../../constants/common");
 const paymentDb = require("../../dbUtils/paymentDb");
+const helper = require("../../utils/helper");
 const stripeHelper = require("../../utils/stripeHelper");
 
 class PurchaseService {
@@ -54,6 +55,7 @@ class PurchaseService {
       throw new Error(err.message);
     }
   }
+
   async getHistoryOfUserPurchase(customerId) {
     try {
       const history = await paymentDb.purchaseHistoryOfCustomer(customerId, [
@@ -64,68 +66,12 @@ class PurchaseService {
         "subscriptionId",
         "paymentIntentId",
       ]);
-      await Promise.all(
-        history.map(async (record) => {
-          if (record.invoiceId !== null && record.subscriptionId !== null) {
-            const subscription =
-              await stripeHelper.getSubscriptionBySubscriptionId(
-                record.subscriptionId
-              );
-            const invoice = await stripeHelper.getInvoiceById(record.invoiceId);
 
-            const startDate = new Date(invoice.created * 1000);
-
-            let endDate = new Date(startDate);
-
-            const unit = subscription.plan.interval;
-            const value = subscription.plan.interval_count;
-
-            switch (unit.toLowerCase()) {
-              case "week":
-                endDate.setDate(endDate.getDate() + value * 7);
-                break;
-              case "month":
-                endDate.setMonth(endDate.getMonth() + value);
-                break;
-              case "year":
-                endDate.setFullYear(endDate.getFullYear() + value);
-                break;
-              default:
-                endDate.setDate(endDate.getDate() + 30);
-                break;
-            }
-
-            record.planName = subscription.metadata.planName;
-            record.amount = invoice.amount_due / 100;
-            record.currency = subscription.currency.toUpperCase();
-            record.status = subscription.status;
-            record.startDate = startDate.toISOString();
-            record.nextDueDate = endDate.toISOString();
-            record.planEndDate = subscription.cancel_at
-              ? new Date(subscription.cancel_at * 1000).toISOString()
-              : new Date(subscription.canceled_at * 1000).toISOString();
-            record.invoiceUrl = invoice.hosted_invoice_url;
-          } else {
-            const paymentIntent = await stripeHelper.getPaymentIntentById(
-              record.paymentIntentId
-            );
-            record.planName =
-              paymentIntent.metadata.planName || "One-time purchase";
-            record.amount = paymentIntent.amount / 100;
-            record.currency = paymentIntent.currency.toUpperCase();
-            record.startDate = new Date(
-              paymentIntent.created * 1000
-            ).toISOString();
-            record.nextDueDate = null;
-            record.planEndDate = new Date(
-              paymentIntent.metadata.planEndDate
-            ).toISOString();
-          }
-        })
-      );
+      await helper.formatTransactionData(history);
       if (history.length < 1) {
         throw new Error("PLAN_NOT_FOUND");
       }
+
       return { history };
     } catch (err) {
       throw new Error(err.message);

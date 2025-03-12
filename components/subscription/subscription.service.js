@@ -1,10 +1,17 @@
 const common = require("../../constants/common");
 const paymentDb = require("../../dbUtils/paymentDb");
+const promocodeDb = require("../../dbUtils/promocodeDb");
 const userDb = require("../../dbUtils/userDb");
+const helper = require("../../utils/helper");
 const stripeHelper = require("../../utils/stripeHelper");
 
 class SubscriptionService {
-  async createSubscription(stripeCustomerId, priceId, paymentMethodId) {
+  async createSubscription(
+    stripeCustomerId,
+    priceId,
+    paymentMethodId,
+    promocode
+  ) {
     try {
       const customerFound = await stripeHelper.findCustomerByCustomerId(
         stripeCustomerId
@@ -22,22 +29,34 @@ class SubscriptionService {
       if (paymentMethodExist.customer != customerFound.id) {
         throw new Error("PAYMENT_METHOD_NOT_ATTACHED");
       }
+
+      const checkPromocodeIsValid = await helper.checkPromocodeIsValid(
+        promocode,
+        priceDetails.unit_amount,
+        priceDetails.currency
+      );
+
       const subscription = await stripeHelper.createSubscription(
         stripeCustomerId,
         priceId,
-        paymentMethodId
+        paymentMethodId,
+        checkPromocodeIsValid.stripePromoCodeId
       );
 
       const userFound = await userDb.findUserByStripeCustomerId(
         subscription.customer
       );
-      await paymentDb.addPaymentDataInDb({
+
+      const newTransaction = {
         stripeCustomerId: subscription.customer,
         userId: userFound.id,
-        amount: subscription.latest_invoice.amount_due / 100,
+        amount: subscription.latest_invoice.subtotal / 100,
         currency: subscription.currency,
         paymentType: common.PAYMENT_TYPE.SUBSCRIPTION,
-        paymentStatus: common.PAYMENT_STATUS.PENDING,
+        paymentStatus:
+          subscription.latest_invoice.amount_due === 0
+            ? common.PAYMENT_STATUS.SUCCEEDED
+            : common.PAYMENT_STATUS.PENDING,
         paymentMethod: {
           id: subscription.default_payment_method,
           type: "card",
@@ -45,7 +64,9 @@ class SubscriptionService {
         invoiceId: subscription.latest_invoice.id,
         subscriptionId: subscription.id,
         paymentIntentId: null,
-      });
+      };
+      await paymentDb.addPaymentDataInDb(newTransaction);
+
       return subscription;
     } catch (err) {
       console.log({ "Error from create subscription": err });

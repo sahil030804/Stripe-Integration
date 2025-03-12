@@ -14,6 +14,9 @@ module.exports = {
       },
       userId: {
         type: DataTypes.INTEGER,
+        references: {
+          model: "users",
+        },
       },
       amount: {
         type: DataTypes.INTEGER,
