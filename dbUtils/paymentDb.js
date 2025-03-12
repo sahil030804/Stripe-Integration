@@ -4,11 +4,12 @@ const common = require("../constants/common");
 
 class PaymentDb extends Payment {
   async addPaymentDataInDb(paymentData) {
-    await Payment.create(paymentData);
+    const result = await Payment.create(paymentData);
+    return result.toJSON();
   }
 
   async updatePaymentDataInDb(paymentData, id) {
-    await Payment.update(paymentData, {
+    const result = await Payment.update(paymentData, {
       where: {
         [Op.or]: [
           {
@@ -20,7 +21,9 @@ class PaymentDb extends Payment {
         ],
       },
       returning: true,
+      plain: true,
     });
+    return result[1];
   }
 
   async getPaymentStatusFromDb(id) {
@@ -39,7 +42,7 @@ class PaymentDb extends Payment {
     return result.count;
   }
 
-  async purchaseHistoryOfCustomer(customer, attributes) {
+  async purchaseHistoryOfCustomer(customer, attributes = null) {
     const history = await Payment.findAll({
       where: {
         [Op.and]: [

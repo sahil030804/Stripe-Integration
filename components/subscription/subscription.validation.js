@@ -5,6 +5,7 @@ module.exports = {
     body: Joi.object({
       priceId: Joi.string().required(),
       paymentMethodId: Joi.string().required(),
+      promocode: Joi.string(),
     }),
   },
   updateSubscription: {

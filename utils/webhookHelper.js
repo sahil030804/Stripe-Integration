@@ -1,10 +1,17 @@
 const common = require("../constants/common");
 const paymentDb = require("../dbUtils/paymentDb");
 const userDb = require("../dbUtils/userDb");
+const helper = require("./helper");
 const stripeHelper = require("./stripeHelper");
 
 module.exports = {
   async addPaymentDataInDb(intentObj) {
+    const userFound = await userDb.findUserByStripeCustomerId(
+      intentObj.customer
+    );
+    if (!userFound) {
+      throw new Error("USER_NOT_FOUND");
+    }
     if (intentObj.invoice && intentObj.description) {
       const invoiceExist = await paymentDb.checkExistingInvoice(
         intentObj.invoice
@@ -17,14 +24,12 @@ module.exports = {
           },
           intentObj.invoice
         );
+
         return;
       }
       const invoice = await stripeHelper.getInvoiceById(intentObj.invoice);
 
-      const userFound = await userDb.findUserByStripeCustomerId(
-        intentObj.customer
-      );
-      await paymentDb.addPaymentDataInDb({
+      const newTransaction = {
         stripeCustomerId: intentObj.customer,
         userId: userFound.id,
         amount: intentObj.amount / 100,
@@ -38,7 +43,8 @@ module.exports = {
         invoiceId: intentObj.invoice,
         subscriptionId: invoice.subscription,
         paymentIntentId: intentObj.id,
-      });
+      };
+      await paymentDb.addPaymentDataInDb(newTransaction);
     }
 
     const currentStatus = await paymentDb.getPaymentStatusFromDb(

@@ -6,7 +6,8 @@ class SubscriptionController {
       const subscription = await subcriptionService.createSubscription(
         req.user.stripeCustomerId,
         req.body.priceId,
-        req.body.paymentMethodId
+        req.body.paymentMethodId,
+        req.body.promocode
       );
       res.status(200).json(subscription);
     } catch (err) {

@@ -90,6 +90,20 @@ module.exports = {
 
   //payment methods
 
+  PAYMENT_METHOD_NOT_CREATED: {
+    httpStatusCode: 403,
+    body: {
+      code: "failed",
+      message: "Failed to create payment method",
+    },
+  },
+  PAYMENT_METHOD_NOT_UPDATED: {
+    httpStatusCode: 403,
+    body: {
+      code: "failed",
+      message: "Failed to update payment method",
+    },
+  },
   PAYMENT_METHOD_NOT_FOUND: {
     httpStatusCode: 404,
     body: {
@@ -120,6 +134,60 @@ module.exports = {
       code: "invalid",
       message:
         "Ensure that subscription create for recurring price and payment intent for onetime price only not vice versa.",
+    },
+  },
+
+  //Promocode related
+  CODE_ALREADY_DELETED: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Promo code is already deleted.",
+    },
+  },
+  CODE_ALREADY_EXIST: {
+    httpStatusCode: 409,
+    body: {
+      code: "duplicate",
+      message: "Promo code is already exist with this name.",
+    },
+  },
+  CODE_NOT_FOUND: {
+    httpStatusCode: 404,
+    body: {
+      code: "not_found",
+      message: "Invalid promo code.",
+    },
+  },
+  INVALID_CURRENCY: {
+    httpStatusCode: 400,
+    body: {
+      code: "invalid",
+      message: "Promo code is not valid for this currency.",
+    },
+  },
+  MINIMUM_AMOUNT_NOT_MET: {
+    httpStatusCode: 400,
+    body: {
+      code: "invalid",
+      message:
+        "Amount is not match with minimum amount criteria for this promocode.",
+    },
+  },
+
+  //Payment intent related
+  PAYMENT_INTENT_NOT_CREATED: {
+    httpStatusCode: 403,
+    body: {
+      code: "failed",
+      message: "Failed to create payment intent.",
+    },
+  },
+  PAYMENT_INTENT_NOT_CONFIRMED: {
+    httpStatusCode: 403,
+    body: {
+      code: "failed",
+      message: "Failed to confirm payment intent.",
     },
   },
 };

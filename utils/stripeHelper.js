@@ -24,22 +24,25 @@ module.exports = {
   },
 
   async updatePaymentMethod(paymentMethodId, paymentDetails, billing_details) {
-    await stripe.paymentMethods.update(paymentMethodId, {
+    const paymentMethod = await stripe.paymentMethods.update(paymentMethodId, {
       card: paymentDetails,
       billing_details,
     });
+    return paymentMethod;
   },
 
   async findCustomerByCustomerId(customerId) {
     const customer = await stripe.customers.retrieve(customerId);
     return customer;
   },
+
   //plans related
 
   async findPriceByStripePriceId(priceId) {
     const price = await stripe.prices.retrieve(priceId);
     return price;
   },
+
   async findProductByStripeProductId(productId) {
     const product = await stripe.products.retrieve(productId);
     return product;
@@ -63,6 +66,7 @@ module.exports = {
     });
     return price;
   },
+
   async createRecurringPriceInStripe(data, productId) {
     const price = await stripe.prices.create({
       currency: common.CURRENCY.USD,
@@ -82,11 +86,13 @@ module.exports = {
     });
     return plan;
   },
+
   deleteStripePrice(priceId) {
     stripe.prices.update(priceId, {
       active: false,
     });
   },
+
   deleteStripeProduct(productId) {
     stripe.products.del(productId);
   },
@@ -153,7 +159,7 @@ module.exports = {
 
   //Subscription related
 
-  async createSubscription(customer, priceId, paymentMethodId) {
+  async createSubscription(customer, priceId, paymentMethodId, promocode) {
     const { product } = await this.findPriceByStripePriceId(priceId);
     const productData = await this.findProductByStripeProductId(product);
     const endDate = new Date();
@@ -174,6 +180,7 @@ module.exports = {
       expand: ["latest_invoice"],
       default_payment_method: paymentMethodId,
       collection_method: common.COLLECTION_METHOD.AUTOMATIC,
+      promotion_code: promocode,
     });
     return subscription;
   },
@@ -186,20 +193,25 @@ module.exports = {
       },
     });
   },
+
   async pauseSubscription(subscriptionId) {
     const subscription = await stripe.subscriptions.update(subscriptionId, {
       pause_collection: {
-        behavior: "mark_uncollectible",
+        behavior: common.COLLECTION_BEHAVIOUR.UNCOLLECTIBLE,
       },
     });
     return subscription;
   },
+
   async resumeSubscription(subscriptionId) {
     const subscription = await stripe.subscriptions.update(subscriptionId, {
       pause_collection: null,
+      // billing_cycle_anchor: "now",
+      // proration_behavior: "create_prorations",
     });
     return subscription;
   },
+
   async cancelSubscription(subscriptionId, feedback) {
     await stripe.subscriptions.cancel(subscriptionId, {
       cancellation_details: {
@@ -215,6 +227,7 @@ module.exports = {
     });
     return subscriptions.data;
   },
+
   async getSubscriptionBySubscriptionId(subscriptionId) {
     const subscriptions = await stripe.subscriptions.retrieve(subscriptionId);
     return subscriptions;
@@ -272,8 +285,70 @@ module.exports = {
   },
 
   async getPaymentIntentById(id) {
-    const paymentIntent = await stripe.paymentIntents.retrieve(id);
+    const paymentIntent = await stripe.paymentIntents.retrieve(id, {
+      expand: ["latest_charge"],
+    });
     return paymentIntent;
+  },
+
+  //Promocode related
+
+  async createCoupen(couponData) {
+    const couponObj = {
+      id: couponData.name,
+      name: couponData.name,
+      duration: couponData.durationType,
+      duration_in_months: couponData.duration_in_months,
+      currency: couponData.currency,
+    };
+    if (couponData.amount_off) {
+      couponObj.amount_off = parseFloat(couponData.amount_off * 100);
+    }
+    if (couponData.percent_off) {
+      couponObj.percent_off = parseFloat(couponData.percent_off);
+    }
+
+    const coupon = await stripe.coupons.create(couponObj);
+    return coupon;
+  },
+
+  async updateCoupon(couponId, updateObj) {
+    const updatedCoupon = await stripe.coupons.update(couponId, updateObj);
+    return updatedCoupon;
+  },
+
+  async deleteCoupon(couponId) {
+    await stripe.coupons.del(couponId);
+  },
+
+  async createPromocode(promocodeData, stripeCouponId) {
+    const promocodeObj = {
+      coupon: stripeCouponId,
+      code: promocodeData.code,
+      expires_at: promocodeData.expires_at,
+      max_redemptions: promocodeData.max_redemptions || null,
+    };
+    if (promocodeData.minimum_amount && promocodeData.minimum_amount_currency) {
+      promocodeObj.restrictions = {
+        minimum_amount: promocodeData.minimum_amount,
+        minimum_amount_currency: promocodeData.minimum_amount_currency,
+      };
+    }
+    const promocode = await stripe.promotionCodes.create(promocodeObj);
+    return promocode;
+  },
+
+  // async updatePromoCode(promoCodeId, updateObj) {
+  //   const updatedPromocode = await stripe.promotionCodes.update(promoCodeId, {
+  //     active: updateObj.active,
+  //   });
+  //   return updatedPromocode;
+  // },
+
+  async deletePromoCode(promoCodeId) {
+    await stripe.promotionCodes.update(promoCodeId, {
+      active: "false",
+    });
   },
 
   //Webhook related

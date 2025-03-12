@@ -10,6 +10,7 @@ class PaymentMethodService {
         billingDetails,
         customerId
       );
+      if (!paymentMethod) throw new Error("PAYMENT_METHOD_NOT_CREATED");
       const checkDefaultMethodExist = await userDb.checkDefaultMethodExist(
         customerId
       );
@@ -42,17 +43,15 @@ class PaymentMethodService {
   }
   async updatePaymentMethod(paymentMethodId, paymentDetails, billingDetails) {
     try {
-      await stripeHelper.updatePaymentMethod(
+      const updatedMethod = await stripeHelper.updatePaymentMethod(
         paymentMethodId,
         paymentDetails,
         billingDetails
       );
+      if (!updatedMethod) throw new Error("PAYMENT_METHOD_NOT_UPDATED");
       return { status: true };
     } catch (err) {
       console.log({ "Error from update payment method": err });
-      // if (err.type.includes("Stripe")) {
-      //   stripeHelper.throwStripeErrors(err);
-      // }
       throw new Error(err.message);
     }
   }
@@ -82,9 +81,6 @@ class PaymentMethodService {
       return { paymentMethods: paymentMethods.data };
     } catch (err) {
       console.log({ "Error from get all payment method": err });
-      // if (err.type.includes("Stripe")) {
-      //   stripeHelper.throwStripeErrors(err);
-      // }
       throw new Error(err.message);
     }
   }
@@ -110,9 +106,6 @@ class PaymentMethodService {
       };
     } catch (err) {
       console.log({ "Error from setting default payment method": err });
-      // if (err.type.includes("Stripe")) {
-      //   stripeHelper.throwStripeErrors(err);
-      // }
       throw new Error(err.message);
     }
   }
@@ -144,9 +137,6 @@ class PaymentMethodService {
       };
     } catch (err) {
       console.log({ "Error from delete payment method": err });
-      // if (err.type.includes("Stripe")) {
-      //   await stripeHelper.throwStripeErrors(err);
-      // }
       throw new Error(err.message);
     }
   }

@@ -34,7 +34,7 @@ class Queues {
     const job = await paymentProcessQueue.add(
       "paymentProcessJob",
       { event },
-      { attempts: 3, removeOnComplete: { age: 10 }, removeOnFail: 5 }
+      { attempts: 5, removeOnComplete: { age: 10 }, removeOnFail: 5 }
     );
     return job;
   }

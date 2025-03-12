@@ -3,6 +3,7 @@ const webhookHelper = require("../../utils/webhookHelper");
 const queueHelper = require("../../utils/queueHelper");
 
 const _ = require("lodash");
+const promocodeDb = require("../../dbUtils/promocodeDb");
 
 class WebhookService {
   async stripeWebhooks(body, sig) {
@@ -12,7 +13,7 @@ class WebhookService {
 
       if (!event) return;
 
-      let intentObj, subscriptionObj;
+      let intentObj, subscriptionObj, promocodeObj;
 
       switch (event.type) {
         case "payment_intent.payment_failed":
@@ -35,7 +36,17 @@ class WebhookService {
               invoice_settings.default_payment_method
             );
           }
-
+          break;
+        case "promotion_code.updated":
+          promocodeObj = event.data.object;
+          await promocodeDb.updatePromocodeInDb(
+            {
+              stripePromoCodeId: promocodeObj.id,
+            },
+            {
+              times_redeemed: promocodeObj.times_redeemed,
+            }
+          );
           break;
         default:
           break;
