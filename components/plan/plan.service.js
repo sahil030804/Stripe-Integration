@@ -15,33 +15,43 @@ class PlanService {
         throw new Error('PLAN_ALREADY_EXIST');
       }
       const stripeProduct = await stripeHelper.createProductInStripe(planData);
-      const onetime = await Promise.all(
-        (planData.onetime || []).map(async (data) => {
-          const stripePrice = await stripeHelper.createOnetimePriceInStripe(
-            data,
-            stripeProduct.id
-          );
-          return {
-            priceId: stripePrice.id,
-            amount: stripePrice.unit_amount / 100,
-            validity: stripePrice.metadata.validity,
-          };
-        })
-      );
+      let onetime;
+      if (planData.onetime && planData.onetime.length > 0) {
+        onetime = await Promise.all(
+          planData.onetime.map(async (data) => {
+            const stripePrice = await stripeHelper.createOnetimePriceInStripe(
+              data,
+              stripeProduct.id
+            );
+            return {
+              priceId: stripePrice.id,
+              amount: stripePrice.unit_amount / 100,
+              validity: stripePrice.metadata.validity,
+            };
+          })
+        );
+      } else {
+        onetime = [];
+      }
 
-      const subscription = await Promise.all(
-        (planData.subscription || []).map(async (data) => {
-          const stripePrice = await stripeHelper.createRecurringPriceInStripe(
-            data,
-            stripeProduct.id
-          );
-          return {
-            priceId: stripePrice.id,
-            amount: stripePrice.unit_amount / 100,
-            interval: stripePrice.recurring.interval,
-          };
-        })
-      );
+      let subscription;
+      if (planData.subscription && planData.subscription.length > 0) {
+        subscription = await Promise.all(
+          (planData.subscription || []).map(async (data) => {
+            const stripePrice = await stripeHelper.createRecurringPriceInStripe(
+              data,
+              stripeProduct.id
+            );
+            return {
+              priceId: stripePrice.id,
+              amount: stripePrice.unit_amount / 100,
+              interval: stripePrice.recurring.interval,
+            };
+          })
+        );
+      } else {
+        subscription = [];
+      }
       planData.stripeProductId = stripeProduct.id;
       const plan = await planDb.addPlanInDb(planData, onetime, subscription);
       return { plan };
@@ -77,33 +87,43 @@ class PlanService {
         existingPlan.stripeProductId,
         planData
       );
-      const onetime = await Promise.all(
-        (planData.onetime || []).map(async (data) => {
-          const stripePrice = await stripeHelper.createOnetimePriceInStripe(
-            data,
-            existingPlan.stripeProductId
-          );
-          return {
-            priceId: stripePrice.id,
-            amount: stripePrice.unit_amount / 100,
-            validity: stripePrice.metadata.validity,
-          };
-        })
-      );
+      let onetime;
+      if (planData.onetime && planData.onetime.length > 0) {
+        onetime = await Promise.all(
+          (planData.onetime || []).map(async (data) => {
+            const stripePrice = await stripeHelper.createOnetimePriceInStripe(
+              data,
+              existingPlan.stripeProductId
+            );
+            return {
+              priceId: stripePrice.id,
+              amount: stripePrice.unit_amount / 100,
+              validity: stripePrice.metadata.validity,
+            };
+          })
+        );
+      } else {
+        onetime = [];
+      }
 
-      const subscription = await Promise.all(
-        (planData.subscription || []).map(async (data) => {
-          const stripePrice = await stripeHelper.createRecurringPriceInStripe(
-            data,
-            existingPlan.stripeProductId
-          );
-          return {
-            priceId: stripePrice.id,
-            amount: stripePrice.unit_amount / 100,
-            interval: stripePrice.recurring.interval,
-          };
-        })
-      );
+      let subscription;
+      if (planData.subscription && planData.subscription.length > 0) {
+        subscription = await Promise.all(
+          (planData.subscription || []).map(async (data) => {
+            const stripePrice = await stripeHelper.createRecurringPriceInStripe(
+              data,
+              existingPlan.stripeProductId
+            );
+            return {
+              priceId: stripePrice.id,
+              amount: stripePrice.unit_amount / 100,
+              interval: stripePrice.recurring.interval,
+            };
+          })
+        );
+      } else {
+        subscription = [];
+      }
 
       const updatedplans = await planDb.updatePlanInDb(
         planData,
