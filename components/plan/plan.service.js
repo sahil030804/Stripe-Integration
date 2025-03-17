@@ -1,7 +1,7 @@
-const { Op } = require("sequelize");
-const common = require("../../constants/common");
-const planDb = require("../../dbUtils/planDb");
-const stripeHelper = require("../../utils/stripeHelper");
+const { Op } = require('sequelize');
+const common = require('../../constants/common');
+const planDb = require('../../dbUtils/planDb');
+const stripeHelper = require('../../utils/stripeHelper');
 
 class PlanService {
   async createPlan(planData) {
@@ -12,7 +12,7 @@ class PlanService {
         },
       });
       if (checkPlanExistWithName > 0) {
-        throw new Error("PLAN_ALREADY_EXIST");
+        throw new Error('PLAN_ALREADY_EXIST');
       }
       const stripeProduct = await stripeHelper.createProductInStripe(planData);
       const onetime = await Promise.all(
@@ -46,7 +46,7 @@ class PlanService {
       const plan = await planDb.addPlanInDb(planData, onetime, subscription);
       return { plan };
     } catch (err) {
-      console.log({ "Error from create plan": err });
+      console.log({ 'Error from create plan': err });
       throw new Error(err.message);
     }
   }
@@ -54,7 +54,7 @@ class PlanService {
     try {
       const existingPlan = await planDb.findPlanById(planId);
       if (!existingPlan) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       const checkPlanExistWithName = await planDb.countByQuery({
         where: {
@@ -65,7 +65,7 @@ class PlanService {
         },
       });
       if (checkPlanExistWithName > 0) {
-        throw new Error("PLAN_ALREADY_EXIST");
+        throw new Error('PLAN_ALREADY_EXIST');
       }
       existingPlan.stripePricesId.onetime.map((price) => {
         stripeHelper.deleteStripePrice(price.priceId);
@@ -114,7 +114,7 @@ class PlanService {
 
       return { updatedplans };
     } catch (err) {
-      console.log({ "Error from update plan": err });
+      console.log({ 'Error from update plan': err });
       throw new Error(err.message);
     }
   }
@@ -123,12 +123,12 @@ class PlanService {
     try {
       const plans = await planDb.getAllPlansFromDb(page, limit);
       if (plans.length == 0) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
 
       return { plans };
     } catch (err) {
-      console.log({ "Error from get all plans": err });
+      console.log({ 'Error from get all plans': err });
       throw new Error(err.message);
     }
   }
@@ -139,12 +139,12 @@ class PlanService {
       );
 
       if (!oneTimePlans) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       return { oneTimePlans };
     } catch (err) {
       console.log({
-        "Error from get active onetime plan": err,
+        'Error from get active onetime plan': err,
       });
       throw new Error(err.message);
     }
@@ -156,12 +156,12 @@ class PlanService {
       );
 
       if (!plans) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       return { plans };
     } catch (err) {
       console.log({
-        "Error from get active subscription plan": err,
+        'Error from get active subscription plan': err,
       });
       throw new Error(err.message);
     }
@@ -170,11 +170,11 @@ class PlanService {
     try {
       const plan = await planDb.findPlanById(planId);
       if (!plan) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       return { plan };
     } catch (err) {
-      console.log({ "Error from get single plan": err });
+      console.log({ 'Error from get single plan': err });
       throw new Error(err.message);
     }
   }
@@ -182,13 +182,13 @@ class PlanService {
     try {
       const isPlanExist = await planDb.planExistingCheck(planId);
       if (!isPlanExist) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       await planDb.deletePlanInDb(planId);
-      return { message: "plans deleted successfully" };
+      return { message: 'plans deleted successfully' };
     } catch (err) {
       console.log({
-        "Error from delete plan": err,
+        'Error from delete plan': err,
       });
       throw new Error(err.message);
     }

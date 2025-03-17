@@ -1,6 +1,5 @@
-const config = require("../config/config");
-const { RefreshToken } = require("../db/models");
-const helper = require("../utils/helper");
+const config = require('../config/config');
+const { RefreshToken } = require('../db/models');
 
 class RefreshTokenDb extends RefreshToken {
   async findToken(token) {

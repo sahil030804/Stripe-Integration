@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("promocodes", {
+    await queryInterface.createTable('promocodes', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       duration: {
-        type: Sequelize.ENUM("forever", "once", "repeating"),
+        type: Sequelize.ENUM('forever', 'once', 'repeating'),
       },
       duration_in_months: {
         type: Sequelize.INTEGER,
@@ -49,27 +49,27 @@ module.exports = {
         type: Sequelize.DATE,
       },
       isActive: {
-        type: Sequelize.ENUM("true", "false"),
-        defaultValue: "true",
+        type: Sequelize.ENUM('true', 'false'),
+        defaultValue: 'true',
       },
       createdBy: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
       },
       updatedBy: {
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
         defaultValue: null,
       },
       deletedBy: {
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
         defaultValue: null,
       },
@@ -86,6 +86,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("promocodes");
+    await queryInterface.dropTable('promocodes');
   },
 };

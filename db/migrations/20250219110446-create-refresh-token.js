@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("refreshTokens", {
+    await queryInterface.createTable('refreshTokens', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,8 +16,8 @@ module.exports = {
       userId: {
         type: DataTypes.INTEGER,
         references: {
-          model: "users",
-          key: "id",
+          model: 'users',
+          key: 'id',
         },
         allowNull: false,
       },
@@ -38,6 +38,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("refreshTokens");
+    await queryInterface.dropTable('refreshTokens');
   },
 };

@@ -1,9 +1,9 @@
-const jwt = require("jsonwebtoken");
-const config = require("../config/config");
-const { v4: uuidv4 } = require("uuid");
-const refreshTokenDb = require("../dbUtils/refreshTokenDb");
-const stripeHelper = require("./stripeHelper");
-const promocodeDb = require("../dbUtils/promocodeDb");
+const jwt = require('jsonwebtoken');
+const config = require('../config/config');
+const { v4: uuidv4 } = require('uuid');
+const refreshTokenDb = require('../dbUtils/refreshTokenDb');
+const stripeHelper = require('./stripeHelper');
+const promocodeDb = require('../dbUtils/promocodeDb');
 
 class Helper {
   async generateAccessAndRefreshToken(userId) {
@@ -22,9 +22,9 @@ class Helper {
 
   getTokenFromHeader(req) {
     let token;
-    const authToken = req.headers["authorization"];
-    if (authToken && authToken.startsWith("Bearer")) {
-      token = authToken.split(" ")[1];
+    const authToken = req.headers['authorization'];
+    if (authToken && authToken.startsWith('Bearer')) {
+      token = authToken.split(' ')[1];
     }
     return token;
   }
@@ -44,19 +44,19 @@ class Helper {
             );
           const invoice = await stripeHelper.getInvoiceById(record.invoiceId);
           const startDate = new Date(invoice.created * 1000);
-          let endDate = new Date(startDate);
+          const endDate = new Date(startDate);
 
           const unit = subscription.plan.interval;
           const value = subscription.plan.interval_count;
 
           switch (unit.toLowerCase()) {
-            case "week":
+            case 'week':
               endDate.setDate(endDate.getDate() + value * 7);
               break;
-            case "month":
+            case 'month':
               endDate.setMonth(endDate.getMonth() + value);
               break;
-            case "year":
+            case 'year':
               endDate.setFullYear(endDate.getFullYear() + value);
               break;
             default:
@@ -79,7 +79,7 @@ class Helper {
           );
 
           record.planName =
-            paymentIntent.metadata.planName || "One-time purchase";
+            paymentIntent.metadata.planName || 'One-time purchase';
           record.amount = paymentIntent.amount / 100;
           record.currency = paymentIntent.currency.toUpperCase();
           record.startDate = new Date(
@@ -107,15 +107,15 @@ class Helper {
     console.log({ promocodeObj });
 
     if (!promocodeObj) {
-      throw new Error("CODE_NOT_FOUND");
+      throw new Error('CODE_NOT_FOUND');
     }
 
     if (promocodeObj.currency !== currency) {
-      throw new Error("INVALID_CURRENCY");
+      throw new Error('INVALID_CURRENCY');
     }
 
     if (amount < promocodeObj.minimum_amount) {
-      throw new Error("MINIMUM_AMOUNT_NOT_MET");
+      throw new Error('MINIMUM_AMOUNT_NOT_MET');
     }
 
     return promocodeObj;

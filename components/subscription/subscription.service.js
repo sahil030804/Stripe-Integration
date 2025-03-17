@@ -1,9 +1,8 @@
-const common = require("../../constants/common");
-const paymentDb = require("../../dbUtils/paymentDb");
-const promocodeDb = require("../../dbUtils/promocodeDb");
-const userDb = require("../../dbUtils/userDb");
-const helper = require("../../utils/helper");
-const stripeHelper = require("../../utils/stripeHelper");
+const common = require('../../constants/common');
+const paymentDb = require('../../dbUtils/paymentDb');
+const userDb = require('../../dbUtils/userDb');
+const helper = require('../../utils/helper');
+const stripeHelper = require('../../utils/stripeHelper');
 
 class SubscriptionService {
   async createSubscription(
@@ -13,21 +12,19 @@ class SubscriptionService {
     promocode
   ) {
     try {
-      const customerFound = await stripeHelper.findCustomerByCustomerId(
-        stripeCustomerId
-      );
+      const customerFound =
+        await stripeHelper.findCustomerByCustomerId(stripeCustomerId);
       if (!customerFound) {
-        throw new Error("USER_NOT_FOUND");
+        throw new Error('USER_NOT_FOUND');
       }
       const priceDetails = await stripeHelper.findPriceByStripePriceId(priceId);
-      if (priceDetails.type == "one_time") {
-        throw new Error("INVALID_PRICE");
+      if (priceDetails.type == 'one_time') {
+        throw new Error('INVALID_PRICE');
       }
-      const paymentMethodExist = await stripeHelper.getPaymentMethodById(
-        paymentMethodId
-      );
+      const paymentMethodExist =
+        await stripeHelper.getPaymentMethodById(paymentMethodId);
       if (paymentMethodExist.customer != customerFound.id) {
-        throw new Error("PAYMENT_METHOD_NOT_ATTACHED");
+        throw new Error('PAYMENT_METHOD_NOT_ATTACHED');
       }
 
       const checkPromocodeIsValid = await helper.checkPromocodeIsValid(
@@ -59,7 +56,7 @@ class SubscriptionService {
             : common.PAYMENT_STATUS.PENDING,
         paymentMethod: {
           id: subscription.default_payment_method,
-          type: "card",
+          type: 'card',
         },
         invoiceId: subscription.latest_invoice.id,
         subscriptionId: subscription.id,
@@ -69,7 +66,7 @@ class SubscriptionService {
 
       return subscription;
     } catch (err) {
-      console.log({ "Error from create subscription": err });
+      console.log({ 'Error from create subscription': err });
       throw new Error(err.message);
     }
   }
@@ -79,9 +76,9 @@ class SubscriptionService {
         subscriptionId,
         paymentMethodId
       );
-      return { message: "Subscription updated.", subscription };
+      return { message: 'Subscription updated.', subscription };
     } catch (err) {
-      console.log({ "Error from update subscription": err });
+      console.log({ 'Error from update subscription': err });
       throw new Error(err.message);
     }
   }
@@ -90,12 +87,12 @@ class SubscriptionService {
       const checkSubscriptionExist =
         await stripeHelper.getSubscriptionBySubscriptionId(subscriptionId);
 
-      if (checkSubscriptionExist.status != "active") {
-        throw new Error("Subscription not available");
+      if (checkSubscriptionExist.status != 'active') {
+        throw new Error('Subscription not available');
       }
       const subscription = await stripeHelper.pauseSubscription(subscriptionId);
       return {
-        message: "Subscription Paused.",
+        message: 'Subscription Paused.',
         subscription: {
           id: subscription.id,
           status: subscription.status,
@@ -103,7 +100,7 @@ class SubscriptionService {
         },
       };
     } catch (err) {
-      console.log({ "Error from pause subscription": err });
+      console.log({ 'Error from pause subscription': err });
       throw new Error(err.message);
     }
   }
@@ -112,14 +109,13 @@ class SubscriptionService {
       const checkSubscriptionExist =
         await stripeHelper.getSubscriptionBySubscriptionId(subscriptionId);
 
-      if (checkSubscriptionExist.status != "active") {
-        throw new Error("Subscription not available");
+      if (checkSubscriptionExist.status != 'active') {
+        throw new Error('Subscription not available');
       }
-      const subscription = await stripeHelper.resumeSubscription(
-        subscriptionId
-      );
+      const subscription =
+        await stripeHelper.resumeSubscription(subscriptionId);
       return {
-        message: "Subscription Resumed.",
+        message: 'Subscription Resumed.',
         subscription: {
           id: subscription.id,
           status: subscription.status,
@@ -127,7 +123,7 @@ class SubscriptionService {
         },
       };
     } catch (err) {
-      console.log({ "Error from resume subscription": err });
+      console.log({ 'Error from resume subscription': err });
       throw new Error(err.message);
     }
   }
@@ -137,9 +133,9 @@ class SubscriptionService {
         subscriptionId,
         feedback
       );
-      return { message: "Subscription cancelled.", subscription };
+      return { message: 'Subscription cancelled.', subscription };
     } catch (err) {
-      console.log({ "Error from cancel subscription": err });
+      console.log({ 'Error from cancel subscription': err });
       throw new Error(err.message);
     }
   }

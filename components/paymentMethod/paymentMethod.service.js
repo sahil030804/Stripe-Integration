@@ -1,6 +1,6 @@
-const userDb = require("../../dbUtils/userDb");
-const stripeHelper = require("../../utils/stripeHelper");
-const _ = require("lodash");
+const userDb = require('../../dbUtils/userDb');
+const stripeHelper = require('../../utils/stripeHelper');
+const _ = require('lodash');
 class PaymentMethodService {
   async createPaymentMethod(type, paymentDetails, billingDetails, customerId) {
     try {
@@ -10,10 +10,9 @@ class PaymentMethodService {
         billingDetails,
         customerId
       );
-      if (!paymentMethod) throw new Error("PAYMENT_METHOD_NOT_CREATED");
-      const checkDefaultMethodExist = await userDb.checkDefaultMethodExist(
-        customerId
-      );
+      if (!paymentMethod) throw new Error('PAYMENT_METHOD_NOT_CREATED');
+      const checkDefaultMethodExist =
+        await userDb.checkDefaultMethodExist(customerId);
 
       if (!checkDefaultMethodExist) {
         await stripeHelper.setDefaultMethodOfCustomer(
@@ -34,7 +33,7 @@ class PaymentMethodService {
       );
       return { paymentMethod };
     } catch (err) {
-      console.log({ "Error from create payment method": err });
+      console.log({ 'Error from create payment method': err });
       // if (err.type.includes("Stripe")) {
       //   stripeHelper.throwStripeErrors(err);
       // }
@@ -48,23 +47,22 @@ class PaymentMethodService {
         paymentDetails,
         billingDetails
       );
-      if (!updatedMethod) throw new Error("PAYMENT_METHOD_NOT_UPDATED");
+      if (!updatedMethod) throw new Error('PAYMENT_METHOD_NOT_UPDATED');
       return { status: true };
     } catch (err) {
-      console.log({ "Error from update payment method": err });
+      console.log({ 'Error from update payment method': err });
       throw new Error(err.message);
     }
   }
   async getAllPaymentMethodsOfCustomer(stripeCustomerId) {
     try {
-      const paymentMethods = await stripeHelper.getAllPaymentMethodsByCutomerId(
-        stripeCustomerId
-      );
+      const paymentMethods =
+        await stripeHelper.getAllPaymentMethodsByCutomerId(stripeCustomerId);
 
       const defaultMethod = await userDb.UserMdl.findOne({
         where: { stripeCustomerId },
         raw: true,
-        attributes: ["defaultPaymentMethod"],
+        attributes: ['defaultPaymentMethod'],
       });
 
       paymentMethods.data.map((method) => {
@@ -73,14 +71,13 @@ class PaymentMethodService {
           return;
         }
         method.isDefault = false;
-        return;
       });
       if (paymentMethods.data.length == 0) {
-        throw new Error("PAYMENT_METHOD_NOT_FOUND");
+        throw new Error('PAYMENT_METHOD_NOT_FOUND');
       }
       return { paymentMethods: paymentMethods.data };
     } catch (err) {
-      console.log({ "Error from get all payment method": err });
+      console.log({ 'Error from get all payment method': err });
       throw new Error(err.message);
     }
   }
@@ -90,11 +87,10 @@ class PaymentMethodService {
         stripeCustomerId,
         paymentMethodId
       );
-      const paymentMethod = await stripeHelper.getPaymentMethodById(
-        paymentMethodId
-      );
+      const paymentMethod =
+        await stripeHelper.getPaymentMethodById(paymentMethodId);
       if (!paymentMethod) {
-        throw new Error("METHOD_NOT_FOUND");
+        throw new Error('METHOD_NOT_FOUND');
       }
       await userDb.addCustomerDefaultMethodInDb(
         stripeCustomerId,
@@ -105,27 +101,26 @@ class PaymentMethodService {
         status: true,
       };
     } catch (err) {
-      console.log({ "Error from setting default payment method": err });
+      console.log({ 'Error from setting default payment method': err });
       throw new Error(err.message);
     }
   }
   async deletePaymentMethodOfCustomer(stripeCustomerId, paymentMethodId) {
     try {
-      const subscriptionsList = await stripeHelper.getSubscriptionByCustomerId(
-        stripeCustomerId
-      );
+      const subscriptionsList =
+        await stripeHelper.getSubscriptionByCustomerId(stripeCustomerId);
       const usedPaymentMethod = _.map(
         subscriptionsList,
-        "default_payment_method" // get only payment methods id from array by lodash map method
+        'default_payment_method' // get only payment methods id from array by lodash map method
       );
       if (usedPaymentMethod.includes(paymentMethodId)) {
-        throw new Error("CANNOT_DELETE_METHOD");
+        throw new Error('CANNOT_DELETE_METHOD');
       }
       let customerPaymentMethods =
         await stripeHelper.getAllPaymentMethodsByCutomerId(stripeCustomerId);
-      customerPaymentMethods = _.map(customerPaymentMethods.data, "id"); // get only payment methods id from array by lodash map method
+      customerPaymentMethods = _.map(customerPaymentMethods.data, 'id'); // get only payment methods id from array by lodash map method
       if (!customerPaymentMethods.includes(paymentMethodId)) {
-        throw new Error("PAYMENT_METHOD_NOT_ATTACHED");
+        throw new Error('PAYMENT_METHOD_NOT_ATTACHED');
       }
       await stripeHelper.detachMethodFromCustomer(paymentMethodId);
       await userDb.deletePaymentMethodFromCustomerDB(
@@ -136,7 +131,7 @@ class PaymentMethodService {
         status: true,
       };
     } catch (err) {
-      console.log({ "Error from delete payment method": err });
+      console.log({ 'Error from delete payment method': err });
       throw new Error(err.message);
     }
   }

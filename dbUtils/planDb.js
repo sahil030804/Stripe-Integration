@@ -1,7 +1,5 @@
-const { Op } = require("sequelize");
-const config = require("../config/config");
-const common = require("../constants/common");
-const { Plan } = require("../db/models");
+const { Op } = require('sequelize');
+const { Plan } = require('../db/models');
 
 class PlanDb extends Plan {
   async planExistingCheck(id) {
@@ -49,7 +47,7 @@ class PlanDb extends Plan {
         plain: true,
       }
     );
-    return plan[1]; //it return only new data
+    return plan[1]; // it return only new data
   }
 
   async deletePlanInDb(id) {
@@ -60,7 +58,7 @@ class PlanDb extends Plan {
     const plans = await Plan.findAll({
       limit,
       offset: (page - 1) * limit,
-      order: [["id", "DESC"]],
+      order: [['id', 'DESC']],
       raw: true,
     });
     return plans;
@@ -70,7 +68,7 @@ class PlanDb extends Plan {
     const plans = await Plan.findAll({
       where: {
         stripePricesId: {
-          [Op.contains]: { [planType]: [{}] }, //check if key exist in table and also has atleast one object
+          [Op.contains]: { [planType]: [{}] }, // check if key exist in table and also has atleast one object
         },
       },
       raw: true,

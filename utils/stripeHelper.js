@@ -1,9 +1,9 @@
-const config = require("../config/config");
-const common = require("../constants/common");
-const stripe = require("stripe")(config.stripeConfig.STRIPE_SECRET_KEY);
+const config = require('../config/config');
+const common = require('../constants/common');
+const stripe = require('stripe')(config.stripeConfig.STRIPE_SECRET_KEY);
 
 module.exports = {
-  //customer related
+  // customer related
   async createStripeCustomer(customerData) {
     const user = await stripe.customers.create({
       name: customerData.name,
@@ -36,7 +36,7 @@ module.exports = {
     return customer;
   },
 
-  //plans related
+  // plans related
 
   async findPriceByStripePriceId(priceId) {
     const price = await stripe.prices.retrieve(priceId);
@@ -97,7 +97,7 @@ module.exports = {
     stripe.products.del(productId);
   },
 
-  //Payment method related
+  // Payment method related
 
   async getAllPaymentMethodsByCutomerId(stripeCustomerId) {
     const methods = await stripe.customers.listPaymentMethods(
@@ -126,7 +126,7 @@ module.exports = {
     });
   },
 
-  //Invoice realted
+  // Invoice realted
 
   async createInvoice(customer, collection_method) {
     const invoice = await stripe.invoices.create({
@@ -157,13 +157,13 @@ module.exports = {
     return invoice;
   },
 
-  //Subscription related
+  // Subscription related
 
   async createSubscription(customer, priceId, paymentMethodId, promocode) {
     const { product } = await this.findPriceByStripePriceId(priceId);
     const productData = await this.findProductByStripeProductId(product);
     const endDate = new Date();
-    endDate.setFullYear(endDate.getFullYear() + 1); //temporary set 1 year bydefault
+    endDate.setFullYear(endDate.getFullYear() + 1); // temporary set 1 year bydefault
     const subscription = await stripe.subscriptions.create({
       customer,
       items: [
@@ -177,7 +177,7 @@ module.exports = {
         description: productData.description,
         paymentMethodId,
       },
-      expand: ["latest_invoice"],
+      expand: ['latest_invoice'],
       default_payment_method: paymentMethodId,
       collection_method: common.COLLECTION_METHOD.AUTOMATIC,
       promotion_code: promocode,
@@ -223,7 +223,7 @@ module.exports = {
   async getSubscriptionByCustomerId(customerId) {
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
+      status: 'active',
     });
     return subscriptions.data;
   },
@@ -233,24 +233,24 @@ module.exports = {
     return subscriptions;
   },
 
-  //payment intent related
+  // payment intent related
   async createPaymentIntent(amount, currency, priceId, customer) {
     const { metadata } = await this.findPriceByStripePriceId(priceId);
 
-    let endDate = new Date();
+    const endDate = new Date();
 
     const validity = metadata.validity;
-    const [number, unit] = validity.split(" ");
+    const [number, unit] = validity.split(' ');
     const value = parseInt(number, 10);
 
     switch (unit.toLowerCase()) {
-      case "week":
+      case 'week':
         endDate.setDate(endDate.getDate() + value * 7);
         break;
-      case "month":
+      case 'month':
         endDate.setMonth(endDate.getMonth() + value);
         break;
-      case "year":
+      case 'year':
         endDate.setFullYear(endDate.getFullYear() + value);
         break;
       default:
@@ -269,7 +269,7 @@ module.exports = {
       metadata: {
         ...metadata,
         planEndDate: endDate.toISOString(),
-        priceId: priceId,
+        priceId,
       },
     });
 
@@ -279,19 +279,19 @@ module.exports = {
   async confirmPaymentIntent(id, paymentMethodId) {
     const result = await stripe.paymentIntents.confirm(id, {
       payment_method: paymentMethodId,
-      return_url: "https://www.example.com",
+      return_url: 'https://www.example.com',
     });
     return result;
   },
 
   async getPaymentIntentById(id) {
     const paymentIntent = await stripe.paymentIntents.retrieve(id, {
-      expand: ["latest_charge"],
+      expand: ['latest_charge'],
     });
     return paymentIntent;
   },
 
-  //Promocode related
+  // Promocode related
 
   async createCoupen(couponData) {
     const couponObj = {
@@ -347,11 +347,11 @@ module.exports = {
 
   async deletePromoCode(promoCodeId) {
     await stripe.promotionCodes.update(promoCodeId, {
-      active: "false",
+      active: 'false',
     });
   },
 
-  //Webhook related
+  // Webhook related
   createWebhook(body, sig) {
     const event = stripe.webhooks.constructEvent(
       body,
@@ -361,7 +361,7 @@ module.exports = {
     return event;
   },
 
-  //for erros
+  // for erros
   async throwStripeErrors(err) {
     throw {
       status: err.raw.statusCode,

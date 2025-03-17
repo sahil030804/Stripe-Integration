@@ -1,4 +1,4 @@
-const { Blacklist } = require("../db/models");
+const { Blacklist } = require('../db/models');
 
 class BlacklistDb extends Blacklist {
   async getAllTokens() {

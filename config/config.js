@@ -1,7 +1,7 @@
-const dotenv = require("dotenv-safe");
+const dotenv = require('dotenv-safe');
 dotenv.config({
-  path: "./.env",
-  sample: "./.env.example",
+  path: './.env',
+  sample: './.env.example',
 });
 
 module.exports = {

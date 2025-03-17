@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Payment extends Model {
     /**
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
       },
       amount: {
@@ -36,15 +36,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       subscriptionId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       invoiceId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       paymentIntentId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       paymentType: {
         type: DataTypes.STRING,
@@ -64,8 +64,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Payment",
-      tableName: "payments",
+      modelName: 'Payment',
+      tableName: 'payments',
       timestamps: true,
     }
   );

@@ -1,7 +1,7 @@
-const common = require("../../constants/common");
-const paymentDb = require("../../dbUtils/paymentDb");
-const helper = require("../../utils/helper");
-const stripeHelper = require("../../utils/stripeHelper");
+const common = require('../../constants/common');
+const paymentDb = require('../../dbUtils/paymentDb');
+const helper = require('../../utils/helper');
+const stripeHelper = require('../../utils/stripeHelper');
 
 class PurchaseService {
   async checkPaymentStatus(id) {
@@ -14,11 +14,10 @@ class PurchaseService {
   }
   async getActiveSubscriptionOfUser(customerId) {
     try {
-      const subscriptions = await stripeHelper.getSubscriptionByCustomerId(
-        customerId
-      );
+      const subscriptions =
+        await stripeHelper.getSubscriptionByCustomerId(customerId);
       if (subscriptions.length < 1) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       return { subscriptions };
     } catch (err) {
@@ -48,7 +47,7 @@ class PurchaseService {
         })
       );
       if (onetimePlans.length < 1) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
       return { onetimePlans };
     } catch (err) {
@@ -59,17 +58,17 @@ class PurchaseService {
   async getHistoryOfUserPurchase(customerId) {
     try {
       const history = await paymentDb.purchaseHistoryOfCustomer(customerId, [
-        "amount",
-        "paymentType",
-        "paymentStatus",
-        "invoiceId",
-        "subscriptionId",
-        "paymentIntentId",
+        'amount',
+        'paymentType',
+        'paymentStatus',
+        'invoiceId',
+        'subscriptionId',
+        'paymentIntentId',
       ]);
 
       await helper.formatTransactionData(history);
       if (history.length < 1) {
-        throw new Error("PLAN_NOT_FOUND");
+        throw new Error('PLAN_NOT_FOUND');
       }
 
       return { history };

@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, DataTypes) {
-    await queryInterface.createTable("payments", {
+    await queryInterface.createTable('payments', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -15,7 +15,7 @@ module.exports = {
       userId: {
         type: DataTypes.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
       },
       amount: {
@@ -26,15 +26,15 @@ module.exports = {
       },
       subscriptionId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       invoiceId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       paymentIntentId: {
         type: DataTypes.STRING,
-        defaultValue: "",
+        defaultValue: '',
       },
       paymentType: {
         type: DataTypes.STRING,
@@ -54,6 +54,6 @@ module.exports = {
     });
   },
   async down(queryInterface, DataTypes) {
-    await queryInterface.dropTable("payments");
+    await queryInterface.dropTable('payments');
   },
 };

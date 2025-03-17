@@ -1,4 +1,4 @@
-const promocodeService = require("./promocode.service");
+const promocodeService = require('./promocode.service');
 
 promocodeService;
 class PromocodeController {
