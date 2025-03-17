@@ -1,17 +1,17 @@
-const { Op, Sequelize } = require("sequelize");
-const promocodeDb = require("../../dbUtils/promocodeDb");
-const helper = require("../../utils/helper");
-const stripeHelper = require("../../utils/stripeHelper");
+const { Op, Sequelize } = require('sequelize');
+const promocodeDb = require('../../dbUtils/promocodeDb');
+const helper = require('../../utils/helper');
+const stripeHelper = require('../../utils/stripeHelper');
 
 class PromocodeService {
   async createPromocode(promoCodeData, loggedInUserId) {
     try {
       const isPromocodeExist = await promocodeDb.findPromocodeByFilter(
         { code: promoCodeData.code },
-        ["isActive"]
+        ['isActive']
       );
-      if (isPromocodeExist && isPromocodeExist.isActive != "false") {
-        throw new Error("Promo code already exist");
+      if (isPromocodeExist && isPromocodeExist.isActive != 'false') {
+        throw new Error('Promo code already exist');
       }
       promoCodeData.expires_at = await helper.convertDateToTimestamp(
         promoCodeData.expires_at
@@ -34,11 +34,11 @@ class PromocodeService {
   async deletePromocode(promocodeId, loggedInUserId) {
     try {
       const promocodeData = await promocodeDb.findPromocodeByFilter(
-        { stripePromoCodeId: promocodeId, isActive: { [Op.eq]: "true" } },
-        ["isActive", "stripeCouponId"]
+        { stripePromoCodeId: promocodeId, isActive: { [Op.eq]: 'true' } },
+        ['isActive', 'stripeCouponId']
       );
-      if (!promocodeData || promocodeData.isActive == "false") {
-        throw new Error("CODE_ALREADY_DELETED");
+      if (!promocodeData || promocodeData.isActive == 'false') {
+        throw new Error('CODE_ALREADY_DELETED');
       }
 
       await stripeHelper.deleteCoupon(promocodeData.stripeCouponId);
@@ -47,7 +47,7 @@ class PromocodeService {
         { stripeCouponId: promocodeData.stripeCouponId },
         loggedInUserId
       );
-      return { message: "deleted successfully" };
+      return { message: 'deleted successfully' };
     } catch (err) {
       throw new Error(err.message);
     }
@@ -56,14 +56,14 @@ class PromocodeService {
   async updatePromocode(promocodeId, updateData, loggedInUserId) {
     try {
       const promocodeData = await promocodeDb.findPromocodeByFilter(
-        { stripePromoCodeId: promocodeId, isActive: { [Op.eq]: "true" } },
-        ["isActive", "stripeCouponId", "code"]
+        { stripePromoCodeId: promocodeId, isActive: { [Op.eq]: 'true' } },
+        ['isActive', 'stripeCouponId', 'code']
       );
       if (
         !promocodeData ||
-        (promocodeData.isActive == "false" && !promocodeData.deletedBy)
+        (promocodeData.isActive == 'false' && !promocodeData.deletedBy)
       ) {
-        throw new Error("CODE_ALREADY_DELETED");
+        throw new Error('CODE_ALREADY_DELETED');
       }
       const checkPromocodeExistWithName =
         await promocodeDb.countPromocodeByQuery({
@@ -75,7 +75,7 @@ class PromocodeService {
           },
         });
       if (checkPromocodeExistWithName > 0) {
-        throw new Error("CODE_ALREADY_EXIST");
+        throw new Error('CODE_ALREADY_EXIST');
       }
       const updatedCoupon = await stripeHelper.updateCoupon(
         promocodeData.stripeCouponId,
@@ -115,14 +115,14 @@ class PromocodeService {
               ],
             },
             Sequelize.where(
-              Sequelize.literal("max_redemptions - times_redeemed"),
+              Sequelize.literal('max_redemptions - times_redeemed'),
               { [Op.gt]: 0 }
             ),
           ],
         },
         page,
         limit,
-        { exclude: ["createdBy", "updatedBy", "deletedBy"] }
+        { exclude: ['createdBy', 'updatedBy', 'deletedBy'] }
       );
       return { allPromocode };
     } catch (err) {

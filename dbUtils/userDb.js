@@ -1,6 +1,5 @@
-const config = require("../config/config");
-const { User } = require("../db/models");
-const bcrypt = require("bcrypt");
+const { User } = require('../db/models');
+const bcrypt = require('bcrypt');
 
 class UserDb extends User {
   async countExistingEmail(email) {
@@ -61,7 +60,7 @@ class UserDb extends User {
   ) {
     const user = await this.findUserByStripeCustomerId(stripeCustomerId);
     if (!user) {
-      throw new Error("USER_NOT_FOUND");
+      throw new Error('USER_NOT_FOUND');
     }
     const paymentMethods = user.paymentMethods || [];
     paymentMethods.push({
@@ -80,7 +79,7 @@ class UserDb extends User {
   async deletePaymentMethodFromCustomerDB(stripeCustomerId, paymentMethodId) {
     const user = await this.findUserByStripeCustomerId(stripeCustomerId);
     if (!user) {
-      throw new Error("USER_NOT_FOUND");
+      throw new Error('USER_NOT_FOUND');
     }
 
     let existingPaymentMethods = user.paymentMethods || [];
@@ -106,7 +105,7 @@ class UserDb extends User {
       where: {
         stripeCustomerId: customerId,
       },
-      attributes: ["defaultPaymentMethod"],
+      attributes: ['defaultPaymentMethod'],
       raw: true,
     });
     if (defaultPaymentMethod != null) {

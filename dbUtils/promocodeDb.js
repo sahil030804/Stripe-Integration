@@ -1,4 +1,4 @@
-const { Promocode, User } = require("../db/models");
+const { Promocode, User } = require('../db/models');
 
 class PromocodeDb extends Promocode {
   async countPromocodeByQuery(query) {
@@ -32,7 +32,7 @@ class PromocodeDb extends Promocode {
   async deletePromocodeInDb(query, loggedInUserId) {
     await Promocode.update(
       {
-        isActive: "false",
+        isActive: 'false',
         deletedBy: loggedInUserId,
       },
       { where: query }
@@ -61,18 +61,18 @@ class PromocodeDb extends Promocode {
       include: [
         {
           model: User,
-          as: "createdByUser",
-          attributes: ["name", "email"],
+          as: 'createdByUser',
+          attributes: ['name', 'email'],
         },
         {
           model: User,
-          as: "updatedByUser",
-          attributes: ["name", "email"],
+          as: 'updatedByUser',
+          attributes: ['name', 'email'],
         },
         {
           model: User,
-          as: "deletedByUser",
-          attributes: ["name", "email"],
+          as: 'deletedByUser',
+          attributes: ['name', 'email'],
         },
       ],
       limit,

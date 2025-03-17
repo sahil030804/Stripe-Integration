@@ -1,8 +1,7 @@
-const common = require("../constants/common");
-const paymentDb = require("../dbUtils/paymentDb");
-const userDb = require("../dbUtils/userDb");
-const helper = require("./helper");
-const stripeHelper = require("./stripeHelper");
+const common = require('../constants/common');
+const paymentDb = require('../dbUtils/paymentDb');
+const userDb = require('../dbUtils/userDb');
+const stripeHelper = require('./stripeHelper');
 
 module.exports = {
   async addPaymentDataInDb(intentObj) {
@@ -10,7 +9,7 @@ module.exports = {
       intentObj.customer
     );
     if (!userFound) {
-      throw new Error("USER_NOT_FOUND");
+      throw new Error('USER_NOT_FOUND');
     }
     if (intentObj.invoice && intentObj.description) {
       const invoiceExist = await paymentDb.checkExistingInvoice(
@@ -38,7 +37,7 @@ module.exports = {
         paymentStatus: intentObj.status,
         paymentMethod: {
           id: intentObj.payment_method,
-          type: "card",
+          type: 'card',
         },
         invoiceId: intentObj.invoice,
         subscriptionId: invoice.subscription,
@@ -51,11 +50,11 @@ module.exports = {
       intentObj.invoice ? intentObj.invoice : intentObj.id
     );
 
-    if (currentStatus === "succeeded") {
+    if (currentStatus === 'succeeded') {
       return;
     }
 
-    if (currentStatus != "succeeded" || intentObj.status === "succeeded") {
+    if (currentStatus != 'succeeded' || intentObj.status === 'succeeded') {
       await paymentDb.updatePaymentDataInDb(
         {
           paymentIntentId: intentObj.id,

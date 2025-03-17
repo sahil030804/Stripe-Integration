@@ -1,21 +1,19 @@
-const { Op } = require("sequelize");
-const common = require("../../constants/common");
-const paymentDb = require("../../dbUtils/paymentDb");
-const promocodeDb = require("../../dbUtils/promocodeDb");
-const userDb = require("../../dbUtils/userDb");
-const stripeHelper = require("../../utils/stripeHelper");
-const _ = require("lodash");
-const helper = require("../../utils/helper");
+const common = require('../../constants/common');
+const paymentDb = require('../../dbUtils/paymentDb');
+const userDb = require('../../dbUtils/userDb');
+const stripeHelper = require('../../utils/stripeHelper');
+const _ = require('lodash');
+const helper = require('../../utils/helper');
 
 class PaymentIntentService {
   async createPaymentIntent(priceId, promocodeId, customerId) {
     try {
       const priceFound = await stripeHelper.findPriceByStripePriceId(priceId);
       if (!priceFound.active) {
-        throw new Error("PRICE_DELETED");
+        throw new Error('PRICE_DELETED');
       }
-      if (priceFound.type == "recurring") {
-        throw new Error("INVALID_PRICE");
+      if (priceFound.type == 'recurring') {
+        throw new Error('INVALID_PRICE');
       }
 
       let totalAmount = priceFound.unit_amount / 100;
@@ -43,11 +41,11 @@ class PaymentIntentService {
         priceId,
         customerId
       );
-      if (!paymentIntent) throw new Error("PAYMENT_INTENT_NOT_CREATED");
+      if (!paymentIntent) throw new Error('PAYMENT_INTENT_NOT_CREATED');
       const userFound = await userDb.findUserByStripeCustomerId(
         paymentIntent.customer
       );
-      if (!userFound) throw new Error("USER_NOT_FOUND");
+      if (!userFound) throw new Error('USER_NOT_FOUND');
 
       await paymentDb.addPaymentDataInDb({
         stripeCustomerId: paymentIntent.customer,
@@ -66,7 +64,7 @@ class PaymentIntentService {
         clientSecret: paymentIntent.client_secret,
       };
     } catch (err) {
-      console.log(`Error from create payment intent`, err);
+      console.log('Error from create payment intent', err);
       throw new Error(err.message);
     }
   }
@@ -79,20 +77,20 @@ class PaymentIntentService {
     try {
       let customerPaymentMethods =
         await stripeHelper.getAllPaymentMethodsByCutomerId(stripeCustomerId);
-      customerPaymentMethods = _.map(customerPaymentMethods.data, "id"); // get only payment methods id from array by lodash map method
+      customerPaymentMethods = _.map(customerPaymentMethods.data, 'id'); // get only payment methods id from array by lodash map method
       if (!customerPaymentMethods.includes(paymentMethodId)) {
-        throw new Error("PAYMENT_METHOD_NOT_ATTACHED");
+        throw new Error('PAYMENT_METHOD_NOT_ATTACHED');
       }
       const result = await stripeHelper.confirmPaymentIntent(
         paymentIntentId,
         paymentMethodId
       );
-      if (!result) throw new Error("PAYMENT_INTENT_NOT_CONFIRMED");
+      if (!result) throw new Error('PAYMENT_INTENT_NOT_CONFIRMED');
       await paymentDb.updatePaymentDataInDb(
         {
           paymentMethod: {
             id: result.payment_method ? result.payment_method : null,
-            type: "card",
+            type: 'card',
           },
           paymentStatus: common.PAYMENT_STATUS.PENDING,
         },

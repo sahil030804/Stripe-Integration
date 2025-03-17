@@ -1,5 +1,4 @@
-const Joi = require("joi");
-const common = require("../../constants/common");
+const Joi = require('joi');
 
 module.exports = {
   createPlan: {

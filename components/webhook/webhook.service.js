@@ -1,9 +1,7 @@
-const stripeHelper = require("../../utils/stripeHelper");
-const webhookHelper = require("../../utils/webhookHelper");
-const queueHelper = require("../../utils/queueHelper");
+const stripeHelper = require('../../utils/stripeHelper');
+const queueHelper = require('../../utils/queueHelper');
 
-const _ = require("lodash");
-const promocodeDb = require("../../dbUtils/promocodeDb");
+const promocodeDb = require('../../dbUtils/promocodeDb');
 
 class WebhookService {
   async stripeWebhooks(body, sig) {
@@ -16,13 +14,13 @@ class WebhookService {
       let intentObj, subscriptionObj, promocodeObj;
 
       switch (event.type) {
-        case "payment_intent.payment_failed":
-        case "payment_intent.cancelled":
-        case "payment_intent.succeeded":
+        case 'payment_intent.payment_failed':
+        case 'payment_intent.cancelled':
+        case 'payment_intent.succeeded':
           intentObj = event.data.object;
           await queueHelper.queues.paymentProcessJob(intentObj);
           break;
-        case "customer.subscription.updated":
+        case 'customer.subscription.updated':
           subscriptionObj = event.data.object;
 
           if (subscriptionObj.default_payment_method == null) {
@@ -37,7 +35,7 @@ class WebhookService {
             );
           }
           break;
-        case "promotion_code.updated":
+        case 'promotion_code.updated':
           promocodeObj = event.data.object;
           await promocodeDb.updatePromocodeInDb(
             {
@@ -52,7 +50,7 @@ class WebhookService {
           break;
       }
     } catch (err) {
-      console.error("Webhook Error:", err);
+      console.error('Webhook Error:', err);
       throw new Error(err.message);
     }
   }

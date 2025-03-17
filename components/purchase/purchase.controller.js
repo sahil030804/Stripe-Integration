@@ -1,4 +1,4 @@
-const purchaseService = require("./purchase.service");
+const purchaseService = require('./purchase.service');
 
 class PurchaseController {
   async checkPaymentStatus(req, res, next) {

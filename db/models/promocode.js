@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, Sequelize) => {
   class Promocode extends Model {
     /**
@@ -32,7 +32,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
       },
       duration: {
-        type: Sequelize.ENUM("forever", "once", "repeating"),
+        type: Sequelize.ENUM('forever', 'once', 'repeating'),
       },
       duration_in_months: {
         type: Sequelize.INTEGER,
@@ -59,27 +59,27 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.DATE,
       },
       isActive: {
-        type: Sequelize.ENUM("true", "false"),
-        defaultValue: "true",
+        type: Sequelize.ENUM('true', 'false'),
+        defaultValue: 'true',
       },
       createdBy: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
       },
       updatedBy: {
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
         defaultValue: null,
       },
       deletedBy: {
         type: Sequelize.INTEGER,
         references: {
-          model: "users",
+          model: 'users',
         },
         defaultValue: null,
       },
@@ -96,8 +96,8 @@ module.exports = (sequelize, Sequelize) => {
     },
     {
       sequelize,
-      modelName: "Promocode",
-      tableName: "promocodes",
+      modelName: 'Promocode',
+      tableName: 'promocodes',
       timestamps: true,
     }
   );

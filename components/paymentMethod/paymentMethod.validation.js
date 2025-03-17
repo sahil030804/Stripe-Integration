@@ -1,11 +1,11 @@
-const Joi = require("joi");
+const Joi = require('joi');
 
 module.exports = {
   createPaymentMethod: {
     body: Joi.object({
-      type: Joi.string().valid("card").required().messages({
-        "any.required": "Payment type is required.",
-        "string.empty": "Payment type cannot be empty.",
+      type: Joi.string().valid('card').required().messages({
+        'any.required': 'Payment type is required.',
+        'string.empty': 'Payment type cannot be empty.',
       }),
       paymentDetails: Joi.object({
         // number : Joi.number().required(),

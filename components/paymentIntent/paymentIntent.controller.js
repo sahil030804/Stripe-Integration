@@ -1,4 +1,4 @@
-const paymentIntentService = require("./paymentIntent.service");
+const paymentIntentService = require('./paymentIntent.service');
 
 paymentIntentService;
 class PaymentIntentController {

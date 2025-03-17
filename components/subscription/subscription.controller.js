@@ -1,4 +1,4 @@
-const subcriptionService = require("./subscription.service");
+const subcriptionService = require('./subscription.service');
 
 class SubscriptionController {
   async createSubscription(req, res, next) {

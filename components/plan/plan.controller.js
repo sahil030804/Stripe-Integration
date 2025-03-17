@@ -1,4 +1,4 @@
-const planService = require("./plan.service");
+const planService = require('./plan.service');
 
 class PlanController {
   async createPlan(req, res, next) {

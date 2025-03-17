@@ -1,6 +1,6 @@
-const { Op } = require("sequelize");
-const { Payment } = require("../db/models");
-const common = require("../constants/common");
+const { Op } = require('sequelize');
+const { Payment } = require('../db/models');
+const common = require('../constants/common');
 
 class PaymentDb extends Payment {
   async addPaymentDataInDb(paymentData) {
@@ -29,7 +29,7 @@ class PaymentDb extends Payment {
   async getPaymentStatusFromDb(id) {
     const status = await Payment.findOne({
       where: { [Op.or]: [{ invoiceId: id }, { paymentIntentId: id }] },
-      attributes: ["paymentStatus"],
+      attributes: ['paymentStatus'],
       raw: true,
     });
     return status;
@@ -69,7 +69,7 @@ class PaymentDb extends Payment {
       where: {
         [Op.and]: [
           { stripeCustomerId },
-          { paymentType: type, paymentStatus: "succeeded" },
+          { paymentType: type, paymentStatus: 'succeeded' },
         ],
       },
       attributes,

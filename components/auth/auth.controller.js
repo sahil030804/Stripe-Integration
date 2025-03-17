@@ -1,5 +1,5 @@
-const helper = require("../../utils/helper");
-const authService = require("./auth.service");
+const helper = require('../../utils/helper');
+const authService = require('./auth.service');
 
 class AuthController {
   async register(req, res, next) {
@@ -44,7 +44,9 @@ class AuthController {
   }
   async refreshAccessToken(req, res, next) {
     try {
-      const result = await authService.refreshAccessToken(req.body.refreshToken);
+      const result = await authService.refreshAccessToken(
+        req.body.refreshToken
+      );
       res.status(200).json(result);
     } catch (err) {
       next(err);

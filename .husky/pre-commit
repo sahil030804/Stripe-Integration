@@ -1,0 +1,3 @@
+#!/bin/sh
+npm run eslint-check
+npm run prettier-check
